@@ -53,7 +53,9 @@ setup.bat -NoJava -NoStart
 1. **Pick a company and a format**, or press **Practise** on any question in the bank.
 2. Set the **minutes**, or tick **No timer**.
 3. **Run code** (`Ctrl+Enter`) checks the sample cases. **Submit code** (`Ctrl+Shift+Enter`) runs all hidden tests. Read from STDIN and write to STDOUT, as on HackerRank.
-4. **End test** (or let the timer run out) to see the report. Tab switches are counted, like a proctored test.
+4. **Move between questions** with **◀ Prev / Next ▶**, the Q1, Q2… tabs or `Alt+←/→`. In Practice, a dropdown takes you to any question in the bank, and your code is kept as you move.
+5. **⌂ Home** takes you back to the company page without ending anything. A banner there lets you **Resume**. In a timed test the clock keeps running.
+6. **End test** (or let the timer run out) to see the report. From the report you can go back to the company home, start again, or open **All companies**. Tab switches are counted, like a proctored test.
 
 ![Coding question](docs/coding.png)
 
