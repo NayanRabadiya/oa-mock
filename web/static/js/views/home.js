@@ -25,6 +25,7 @@ function homeHTML(){
       <ul class="rules"><li>Run checks the sample cases. Submit runs all hidden tests and keeps your best score for each question.</li><li>Partial marks: score = tests passed / total × 100, like HackerRank.</li><li>The test ends when the timer runs out. Tick <b>No timer</b> to work without a limit: the clock counts up instead and you end the test yourself. Leaving the tab is counted and shown in the report.</li><li>${esc(CFG.ioRule || "Read input from STDIN and print to STDOUT. Do not print extra text.")}</li></ul>
     </section>
     <section class="panel" aria-labelledby="h-bank"><h2 id="h-bank">Question bank</h2><div class="bank">${bank}</div></section>
+    ${homeSubsHTML()}
     ${hist.length ? `<section class="panel" aria-labelledby="h-hist"><h2 id="h-hist">Past attempts</h2><div class="scroll-x"><table class="hist"><thead><tr><th>When</th><th>Format</th><th>Questions</th><th>Score</th><th>Time</th></tr></thead><tbody>${hrows}</tbody></table></div></section>` : ""}
   </main>`;
 }
@@ -49,6 +50,7 @@ function guardStart(go){
   $("#m-no").onclick = closeModal; $("#m-yes").onclick = () => { closeModal(); go(); };
 }
 function bindHome(){
+  fillHomeSubs();
   if (S.exam && !S.exam.ended){
     $("#rs-go").addEventListener("click", () => { S.view = "exam"; render(); });
     $("#rs-end").addEventListener("click", () => S.exam.practice ? endExam(false) : confirmEnd());

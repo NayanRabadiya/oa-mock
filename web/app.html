@@ -7,15 +7,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="/static/vendor/codemirror/codemirror.css">
+  <link rel="stylesheet" href="/static/vendor/codemirror/addon/show-hint.css">
+  <link rel="stylesheet" href="/static/vendor/codemirror/addon/foldgutter.css">
+  <link rel="stylesheet" href="/static/vendor/codemirror/addon/dialog.css">
   <link rel="stylesheet" href="/static/css/app.css">
   <style>:root{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
-  <script>window.LOCAL_JUDGE = true; window.LOCAL_TOKEN = {{token}};</script>
+  <script>window.LOCAL_JUDGE = true; window.LOCAL_TOKEN = {{token}}; window.OA_COMPANY = "{{company}}";</script>
 </head>
 <body>
   <div id="app"></div>
   <div id="modal" class="modal" hidden></div>
 
-  <!-- third-party: CodeMirror 5 (editor) and AlaSQL (SQL questions), both MIT -->
+  <!-- third-party: CodeMirror 5 (editor + add-ons: search, folding, hints, comments, Sublime/Vim keys) and AlaSQL (SQL questions), all MIT -->
   <script src="/static/vendor/codemirror/codemirror.js"></script>
   <script src="/static/vendor/codemirror/python.js"></script>
   <script src="/static/vendor/codemirror/javascript.js"></script>
@@ -23,6 +26,21 @@
   <script src="/static/vendor/codemirror/clike.js"></script>
   <script src="/static/vendor/codemirror/matchbrackets.js"></script>
   <script src="/static/vendor/codemirror/closebrackets.js"></script>
+  <script src="/static/vendor/codemirror/addon/searchcursor.js"></script>
+  <script src="/static/vendor/codemirror/addon/search.js"></script>
+  <script src="/static/vendor/codemirror/addon/dialog.js"></script>
+  <script src="/static/vendor/codemirror/addon/jump-to-line.js"></script>
+  <script src="/static/vendor/codemirror/addon/match-highlighter.js"></script>
+  <script src="/static/vendor/codemirror/addon/show-hint.js"></script>
+  <script src="/static/vendor/codemirror/addon/active-line.js"></script>
+  <script src="/static/vendor/codemirror/addon/foldcode.js"></script>
+  <script src="/static/vendor/codemirror/addon/foldgutter.js"></script>
+  <script src="/static/vendor/codemirror/addon/brace-fold.js"></script>
+  <script src="/static/vendor/codemirror/addon/indent-fold.js"></script>
+  <script src="/static/vendor/codemirror/addon/comment-fold.js"></script>
+  <script src="/static/vendor/codemirror/addon/comment.js"></script>
+  <script src="/static/vendor/codemirror/addon/sublime.js"></script>
+  <script src="/static/vendor/codemirror/addon/vim.js"></script>
   <script src="/static/vendor/alasql/alasql.min.js"></script>
 
   <!-- this company's questions and config, from data/{{company}}/ -->
@@ -31,9 +49,11 @@
   <!-- the app; order matters: core first, main last -->
   <script src="/static/js/core/config.js"></script>
   <script src="/static/js/core/util.js"></script>
+  <script src="/static/js/exam/editor.js"></script>
   <script src="/static/js/run/workers.js"></script>
   <script src="/static/js/run/sql.js"></script>
   <script src="/static/js/run/judge.js"></script>
+  <script src="/static/js/run/submissions.js"></script>
   <script src="/static/js/exam/session.js"></script>
   <script src="/static/js/views/render.js"></script>
   <script src="/static/js/views/home.js"></script>
@@ -41,6 +61,7 @@
   <script src="/static/js/exam/panels.js"></script>
   <script src="/static/js/exam/controls.js"></script>
   <script src="/static/js/views/report.js"></script>
+  <script src="/static/js/views/submissions.js"></script>
   <script src="/static/js/main.js"></script>
 </body>
 </html>

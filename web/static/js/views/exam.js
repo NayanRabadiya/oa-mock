@@ -28,9 +28,11 @@ function examHTML(){
     <div class="rz-v" id="rz-v" role="separator" aria-orientation="vertical" aria-label="Resize the problem panel" tabindex="0"></div>
     <section class="work" aria-label="Code editor">
       <div class="toolbar">
-        <label for="lang" class="status">Language</label>
-        <select id="lang">${langOpts}</select>
+        <label for="lang" class="sr-only">Language</label>
+        <select id="lang" title="${q.type === "sql" ? "SQL engine: AlaSQL" : lang === "js" ? "JavaScript runs in your browser" : "Runs on your computer"}">${langOpts}</select>
         <button class="btn" id="reset" title="Replace the code with the starter template">Reset</button>
+        <button class="btn" id="subs-btn" title="Your past submissions for this question">🕘 Submissions</button>
+        <span class="ed-wrap"><button class="btn" id="edset" title="Editor settings: suggestions, brackets, font size, key style…" aria-haspopup="dialog" aria-label="Editor settings">⚙</button></span>
         <span class="status" id="rt">${q.type === "sql" ? "SQL engine: AlaSQL" : NEEDS_LOCAL(lang) ? "Needs the local runner" : LOCAL && lang !== "js" ? "Runs on your computer" + (lang === "cpp" ? " (g++)" : lang === "java" ? " (javac)" : " (python)") : lang === "py" ? "Python runs in your browser (first run loads it)" : "JavaScript runs in your browser"}</span>
         <div class="spacer"></div>
         <button class="btn" id="run">Run code</button>
@@ -44,7 +46,7 @@ function examHTML(){
           <span class="cstat" id="cstat"></span>
           <div class="spacer"></div>
           ${q.type === "sql" ? "" : `<label for="usecustom" class="status"><input type="checkbox" id="usecustom"> Custom input</label>`}
-          <span class="status keys">Ctrl+Enter run · Ctrl+Shift+Enter submit · Alt+←/→ question</span>
+          <span class="status keys">${MOD}+Enter run · ${MOD}+Shift+Enter submit · <button class="linkbtn" id="keys-help">F1 all shortcuts</button></span>
         </div>
         <div class="console-body" id="cbody">
           <textarea class="custom-in" id="custom" hidden placeholder="Type custom input here"></textarea>

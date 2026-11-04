@@ -5,6 +5,9 @@ raw-sources/
 *.jpeg
 *.heic
 
+# your past submissions (and anything else the app caches)
+.oa-cache/
+
 # generated
 tools/amazon/build/
 __pycache__/

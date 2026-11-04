@@ -47,8 +47,7 @@ function saveCode(){
 function mountEditor(el, value, lang){
   cm = null; ta = null;
   if (window.CodeMirror){
-    cm = CodeMirror(el, {value, mode:LANGS[lang].mode, lineNumbers:true, indentUnit:4, tabSize:4, indentWithTabs:false, matchBrackets:true, autoCloseBrackets:true,
-      extraKeys:{Tab: c => c.somethingSelected() ? c.indentSelection("add") : c.replaceSelection("    ", "end"), "Ctrl-Enter": () => doRun(false), "Cmd-Enter": () => doRun(false), "Shift-Ctrl-Enter": () => doRun(true), "Shift-Cmd-Enter": () => doRun(true)}});
+    cm = createEditor(el, value, lang);   // exam/editor.js
     let t; cm.on("change", () => { clearTimeout(t); t = setTimeout(saveCode, 400); });
     setTimeout(() => cm.refresh(), 0);
   } else {

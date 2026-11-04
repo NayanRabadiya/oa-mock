@@ -40,6 +40,9 @@ function bindExam(){
   const fit = () => { const ex = document.querySelector(".exam"), bar = document.querySelector(".bar"); if (ex && bar && innerWidth > 900) ex.style.height = (innerHeight - bar.getBoundingClientRect().bottom) + "px"; else if (ex) ex.style.height = ""; if (cm) cm.refresh(); };
   window.onresize = fit; setTimeout(fit, 0);
   bindPanels();
+  $("#subs-btn").addEventListener("click", () => openSubmissions(id));
+  bindEditorSettings();
+  const kh = $("#keys-help"); if (kh) kh.addEventListener("click", showShortcuts);
   mountEditor($("#editor"), codeOf(id, e.lang[id]), e.lang[id]);
   bindNav(e);
   $("#lang").addEventListener("change", ev => { saveCode(); e.lang[id] = ev.target.value; if (q.type === "code") { S.lang = ev.target.value; store.set(K + "-lang", S.lang); } saveExam(); render(); });
@@ -80,6 +83,7 @@ async function doRun(full){
       if (!prev || score >= prev.score) e.best[id] = {score, passed, total:tests.length, lang, at:Date.now()};
       saveExam();
       const tab = document.querySelector(`.qtab[data-q="${e.cur}"] .dot`); if (tab) tab.className = "dot " + (score === 100 ? "full" : score > 0 ? "part" : "");
+      if (res[0].kind !== "Compilation error") recordSubmission(q, lang, codeOf(id, lang), score, passed, tests.length, e);
     }
     const ns = q.samples.length;
     const verdict = passed === tests.length ? ["ok", full ? "All test cases passed" : "Sample cases passed"] : passed ? ["warn", `${passed}/${tests.length} test cases passed`] : ["bad", res[0].kind === "Time limit exceeded" ? "Time limit exceeded" : res[0].kind === "Compilation error" ? "Compilation error" : res.some(r => r.err) ? "Runtime error" : "Wrong answer"];

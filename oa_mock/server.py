@@ -6,11 +6,18 @@ GET  /static/...                     CSS, JS and vendored libraries from web/sta
 GET  /api/companies                  JSON list of companies
 GET  /api/companies/<company>/data.js   window.OA_DATA = {config, questions}
 POST /run                            {lang, code, inputs[], limit} -> {results[]} or {compile_error}
+GET  /api/submissions?company=&qid=  past submissions, newest first (see submissions.py)
+GET  /api/submissions/<company>/<qid>/<id>    one submission with its code
+POST /api/submissions                save a submission
+DELETE /api/submissions/<company>/<qid>/<id>
+
+/run and /api/submissions need the X-Token header that app.html carries.
 """
 import html, json, mimetypes, os, secrets
+from urllib.parse import parse_qs, urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import data, judge
+from . import data, judge, submissions
 
 WEB_DIR = os.path.join(data.ROOT, "web")
 STATIC_DIR = os.path.join(WEB_DIR, "static")
@@ -53,11 +60,51 @@ class Handler(BaseHTTPRequestHandler):
     def _not_found(self):
         self._send(404, "not found", "text/plain; charset=utf-8")
 
+    def _token_ok(self):
+        return self._host_ok() and self.headers.get("X-Token") == TOKEN
+
+    def _json(self, code, obj):
+        self._send(code, json.dumps(obj), "application/json")
+
+    def _body(self):
+        if "application/json" not in self.headers.get("Content-Type", ""):
+            raise submissions.BadRequest("expected JSON")
+        n = int(self.headers.get("Content-Length", "0"))
+        if n > 2 * 1024 * 1024:
+            raise submissions.BadRequest("request too large")
+        return json.loads(self.rfile.read(n) or b"{}")
+
+    def _submissions(self, method, parts, query):
+        """/api/submissions[/<company>/<qid>/<id>]"""
+        if not self._token_ok():
+            return self._json(403, {"error": "forbidden"})
+        try:
+            if method == "GET" and not parts:
+                q = parse_qs(query)
+                one = lambda k: (q.get(k) or [None])[0]
+                return self._json(200, submissions.listing(one("company"), one("qid"), int(one("limit") or 200)))
+            if method == "GET" and len(parts) == 3:
+                hit = submissions.read(*parts)
+                return self._json(200, hit) if hit else self._json(404, {"error": "not found"})
+            if method == "POST" and not parts:
+                return self._json(200, submissions.save(self._body()))
+            if method == "DELETE" and len(parts) == 3:
+                return self._json(200, {"deleted": submissions.delete(*parts)})
+        except (submissions.BadRequest, ValueError) as e:
+            return self._json(400, {"error": str(e)})
+        except OSError as e:
+            return self._json(500, {"error": "could not access %s: %s" % (submissions.SUB_DIR, e)})
+        return self._json(404, {"error": "not found"})
+
     def do_GET(self):
         if not self._host_ok():
             return self._send(403, "forbidden", "text/plain")
-        path = self.path.split("?", 1)[0]
+        url = urlsplit(self.path)
+        path = url.path
         parts = [p for p in path.split("/") if p]
+
+        if parts[:2] == ["api", "submissions"]:
+            return self._submissions("GET", parts[2:], url.query)
 
         if not parts:
             links = "".join('<a class="company" href="/%s">%s<small>%s</small></a>' % (k, html.escape(n), html.escape(t))
@@ -100,7 +147,15 @@ class Handler(BaseHTTPRequestHandler):
         with open(full, "rb") as f:
             self._send(200, f.read(), ctype)
 
+    def do_DELETE(self):
+        parts = [p for p in urlsplit(self.path).path.split("/") if p]
+        if parts[:2] != ["api", "submissions"]:
+            return self._json(404, {"error": "not found"})
+        self._submissions("DELETE", parts[2:], "")
+
     def do_POST(self):
+        if urlsplit(self.path).path == "/api/submissions":
+            return self._submissions("POST", [], "")
         if (self.path != "/run" or not self._host_ok() or self.headers.get("X-Token") != TOKEN
                 or "application/json" not in self.headers.get("Content-Type", "")):
             return self._send(403, '{"error":"forbidden"}', "application/json")

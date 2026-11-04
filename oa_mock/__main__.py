@@ -5,7 +5,7 @@ Options:  --port N   (default 8765, or $OA_PORT)
 """
 import argparse, os, sys, webbrowser
 
-from . import __version__, data, judge, server
+from . import __version__, data, judge, server, submissions
 
 
 def main(argv=None):
@@ -19,6 +19,7 @@ def main(argv=None):
     for lang, desc in judge.describe():
         print("  %-7s %s" % (lang + ":", desc))
 
+    print("  %-7s %s" % ("Saved:", submissions.SUB_DIR))
     srv = server.serve(args.port)
     url = "http://127.0.0.1:%d/" % srv.server_address[1]
     print("\nOpen %s   (Ctrl+C to stop)" % url)

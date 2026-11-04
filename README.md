@@ -9,6 +9,8 @@
 - **Graded like the real thing:** Run checks the samples, and Submit runs every hidden test. Score = tests passed / total × 100, and your best submission counts.
 - **Timed or not:** a countdown that auto-submits, or **No timer** with a count-up clock.
 - **Learn afterwards:** the report shows your code, reference solutions (Python + C++) and a LeetCode question with the same pattern.
+- **Every submission kept:** each Submit is saved on your computer in `.oa-cache/` (git-ignored). Browse them per question or from the home page, and reopen any of them in the editor.
+- **A real editor:** smart indentation, suggestions and snippets as you type, VS Code/Sublime shortcuts (multi-cursor, move/duplicate lines, toggle comment), find/replace, code folding, and an optional Vim mode. Each feature can be switched on or off.
 - **Private:** no account, no camera, no proctoring. The runner only listens on `127.0.0.1`, and history is saved in your browser.
 
 ---
@@ -65,6 +67,39 @@ setup.bat -NoJava -NoStart
 
 ---
 
+## The editor
+
+Click **⚙** in the editor toolbar to turn features on or off. Your choices are saved in the browser.
+
+![Editor settings](docs/editor-settings.png)
+
+| Feature | Default |
+|---|---|
+| Suggestions as you type (words in your file, language keywords, common library names). `Ctrl+Space` shows them any time | on |
+| Snippets: `fori`, `forr`, `vi`, `vvi`, `pii`, `fastio` (C++), `fori`, `readints`, `memo` (Python), `sout`, `fori` (Java)… | on |
+| Auto-close brackets and quotes. Typing `}` over the one already inserted doesn't add a second | on |
+| Syntax highlighting, matching bracket, other uses of the word under the cursor, current line | on |
+| Code folding · wrap long lines · font size · 2 or 4 space indent · key style (VS Code/Sublime, basic, Vim) | folding on, others off / 14 px / 4 / VS Code |
+
+Indentation follows the language. Enter indents after `{` or `:`, `}` / `else:` dedent, Tab and Shift+Tab indent or dedent the line or selection, Backspace removes a whole indent level, and `Ctrl+Shift+I` re-indents the file or selection.
+
+Shortcuts (`Cmd` instead of `Ctrl` on a Mac; **F1** shows them all): `Ctrl+Enter` run · `Ctrl+Shift+Enter` submit · `Ctrl+S` save · `Ctrl+/` comment · `Ctrl+F` / `Ctrl+H` find / replace · `Ctrl+G` go to line · `Ctrl+D` next occurrence · `Ctrl+Shift+D` duplicate line · `Ctrl+Shift+K` delete line · `Ctrl+Shift+↑/↓` move line · `Ctrl+M` matching bracket · `Ctrl+Q` fold · `Alt+PageUp/PageDown` previous / next question.
+
+## Past submissions
+
+Every **Submit** is saved twice: once as the plain source file, and once as a small JSON file with the score, tests passed, language and test format:
+
+```
+.oa-cache/submissions/amazon/flip/20261104-173512-204_cpp_100.cpp
+.oa-cache/submissions/amazon/flip/20261104-173512-204_cpp_100.json
+```
+
+- **🕘 Submissions** in the editor lists the current question's submissions. **View** shows the code, with **Load into editor**, **Copy** and **Delete**.
+- The home page lists the latest submissions for that company. **Practise with this code** reopens one.
+![A past submission](docs/submissions.png)
+
+- `.oa-cache/` is git-ignored, so your solutions never end up in a pull request. Set `OA_CACHE=/some/folder` to keep them elsewhere, e.g. in a synced folder.
+
 ## Question banks
 
 ### Amazon
@@ -119,20 +154,24 @@ oa_mock/                   backend (Python 3.8+, stdlib only)
   __main__.py              start-up: prints compilers, binds 127.0.0.1, opens the browser
   server.py                HTTP routes: pages, static files, /api/companies, POST /run
   judge.py                 compiles and runs code: g++/clang (C++17), javac/java, Python
+  submissions.py           saves / lists / reads past submissions in .oa-cache/
   data.py                  loads data/<company>/, reloading when files change
 web/                       frontend (plain HTML/CSS/JS, no build step)
   index.html, app.html     company picker; the test app (one template for every company)
   static/css/              app.css, index.css
   static/js/core/          config.js (data, languages, saved state), util.js
-  static/js/run/           workers.js (JavaScript answers in a Web Worker), sql.js, judge.js (calls /run, grades)
-  static/js/exam/          session.js (start/end, editor), panels.js, controls.js (timer, navigation, Run/Submit)
-  static/js/views/         render.js, home.js, exam.js, report.js
+  static/js/run/           workers.js (JavaScript answers in a Web Worker), sql.js, judge.js (calls /run, grades),
+                           submissions.js (talks to /api/submissions)
+  static/js/exam/          editor.js (settings, indentation, suggestions, snippets, shortcuts), session.js (start/end),
+                           panels.js, controls.js (timer, navigation, Run/Submit)
+  static/js/views/         render.js, home.js, exam.js, report.js, submissions.js (list + viewer)
   static/js/main.js        global listeners and first render (loaded last)
-  static/vendor/           CodeMirror 5 and AlaSQL, both MIT
+  static/vendor/           CodeMirror 5 (+ add-ons, Sublime/Vim keymaps) and AlaSQL, all MIT
 data/<company>/            question banks
   company.json             name, test formats, question order, unrunnable entries
   questions/<id>.json      statement, samples, hidden tests, reference solutions, stubs/drivers
 sources/                   text/JSON transcriptions of the source material (no PDFs or photos)
+.oa-cache/                 your past submissions (git-ignored, created on first Submit)
 tools/
   check_refs.py            runs every reference solution against its tests
   amazon/                  generators that build data/amazon/ (statements, tests, debugging repo, SJT)
