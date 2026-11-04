@@ -67,7 +67,7 @@ async function doRun(full){
       out.innerHTML = `<p class="muted">Running on custom input…</p>`;
       const r = await runOne(lang, code, $("#custom").value);
       out.innerHTML = `<div class="verdict ${r.tle || r.err ? "bad" : "ok"}">${r.tle ? "Time limit exceeded" : r.ce ? "Compilation error" : r.err ? "Runtime error" : "Finished"}<span class="status">${Math.round(r.ms)} ms</span></div>
-        <div class="tc"><div class="body"><div><div class="lbl">Your output</div><pre>${esc(r.out || "(nothing printed)")}</pre></div>${r.err ? `<div><div class="lbl">Error</div><pre class="err">${esc(r.err)}</pre></div>` : ""}</div></div>`;
+        <div class="tc"><div class="body"><div><div class="lbl">Your output</div><pre>${esc(trunc(r.out || "(nothing printed)"))}</pre></div>${r.err ? `<div><div class="lbl">Error</div><pre class="err">${esc(trunc(r.err))}</pre></div>` : ""}</div></div>`;
       setStat(r.tle ? "Time limit exceeded" : r.ce ? "Compilation error" : r.err ? "Runtime error" : "Custom run finished", r.tle || r.err ? "bad" : "ok");
       return;
     }
@@ -84,25 +84,30 @@ async function doRun(full){
     const ns = q.samples.length;
     const verdict = passed === tests.length ? ["ok", full ? "All test cases passed" : "Sample cases passed"] : passed ? ["warn", `${passed}/${tests.length} test cases passed`] : ["bad", res[0].kind === "Time limit exceeded" ? "Time limit exceeded" : res[0].kind === "Compilation error" ? "Compilation error" : res.some(r => r.err) ? "Runtime error" : "Wrong answer"];
     let html = `<div class="verdict ${verdict[0]}">${verdict[1]}${full ? `<span class="status">Score ${score}/100 · best ${e.best[id].score}/100</span>` : ""}</div>`;
-    if (full) html += `<div class="grid-tests" aria-label="Test results">${res.map((r, i) => `<span class="res ${r.ok ? "ok" : r.kind.startsWith("Time") ? "warn" : "bad"}" title="${r.kind}">${i < ns ? "S" + i : "T" + (i - ns + 1)} ${r.ok ? "✓" : "✗"}</span>`).join("")}</div><p class="status" style="margin-top:8px">S = sample, T = hidden. Hidden inputs stay hidden, as on HackerRank.</p>`;
+    if (full) html += `<div class="grid-tests" aria-label="Test results">${res.map((r, i) => `<span class="res ${r.ok ? "ok" : r.kind.startsWith("Time") ? "warn" : "bad"}" title="Click to view case ${i < ns ? "S" + i : "T" + (i - ns + 1)}" data-tc="${i}" tabindex="0" role="button">${i < ns ? "S" + i : "T" + (i - ns + 1)} ${r.ok ? "✓" : "✗"}</span>`).join("")}</div><p class="status" style="margin-top:8px">S = sample, T = extra. Click a case above to jump to it.</p>`;
     if (res[0].kind === "Compilation error") html += `<pre class="err" style="white-space:pre-wrap">${esc(res[0].err)}</pre>`;
-    else html += res.slice(0, ns).map((r, i) => tcHTML(q, tests[i], r, i)).join("");
+    else html += res.map((r, i) => tcHTML(q, tests[i], r, i, i < ns ? "Sample" : "Hidden")).join("");
     out.innerHTML = html;
+    out.querySelectorAll("[data-tc]").forEach(el => {
+      const jump = () => { const d = $("#tc-" + el.dataset.tc); if (!d) return; d.open = true; d.scrollIntoView({behavior:"smooth", block:"center"}); };
+      el.addEventListener("click", jump);
+      el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); jump(); } });
+    });
     setStat(full ? `${passed}/${tests.length} passed · ${score}/100` : `${passed}/${tests.length} samples passed`, verdict[0]);
   } catch (err){
     setStat("Error", "bad");
     out.innerHTML = `<div class="verdict bad">Could not run the code</div><p>${esc(err.message)}. ${lang === "py" ? "Python loads from the internet the first time; check your connection and press Run again." : ""}</p>`;
   } finally { busy = false; runB.disabled = subB.disabled = false; }
 }
-function tcHTML(q, t, r, i){
+function tcHTML(q, t, r, i, label){
   const cls = r.ok ? "ok" : r.kind.startsWith("Time") ? "warn" : "bad";
   let body;
   if (q.type === "sql"){
-    body = `<div style="grid-column:1/-1">${r.err ? `<pre class="err">${esc(r.err)}</pre>` : tableHTML("your result", r.got.cols.length ? r.got.cols : ["(no columns)"], r.got.rows)}${tableHTML("expected", ["company_name", "department_name", "average_salary"], t.out)}</div>`;
+    body = `<div style="grid-column:1/-1">${r.err ? `<pre class="err">${esc(trunc(r.err))}</pre>` : tableHTML("your result", r.got.cols.length ? r.got.cols : ["(no columns)"], r.got.rows)}${tableHTML("expected", ["company_name", "department_name", "average_salary"], t.out)}</div>`;
   } else {
-    body = `<div><div class="lbl">Input</div><pre>${esc(t.in)}</pre></div><div><div class="lbl">Expected</div><pre>${esc(t.out)}</pre></div><div><div class="lbl">Your output</div><pre>${esc(r.out || "(nothing printed)")}</pre></div>${r.err ? `<div style="grid-column:1/-1"><div class="lbl">Error</div><pre class="err">${esc(r.err)}</pre></div>` : ""}`;
+    body = `<div><div class="lbl">Input</div><pre>${esc(trunc(t.in))}</pre></div><div><div class="lbl">Expected</div><pre>${esc(trunc(t.out))}</pre></div><div><div class="lbl">Your output</div><pre>${esc(trunc(r.out || "(nothing printed)"))}</pre></div>${r.err ? `<div style="grid-column:1/-1"><div class="lbl">Error</div><pre class="err">${esc(trunc(r.err))}</pre></div>` : ""}`;
   }
-  return `<details class="tc" ${r.ok ? "" : "open"}><summary><span class="res ${cls}">${r.kind}</span>Sample case ${i}<span class="ms">${Math.round(r.ms || 0)} ms</span></summary><div class="body">${body}</div></details>`;
+  return `<details class="tc" id="tc-${i}" ${r.ok ? "" : "open"}><summary><span class="res ${cls}">${r.kind}</span>${label} case ${i}<span class="ms">${Math.round(r.ms || 0)} ms</span></summary><div class="body">${body}</div></details>`;
 }
 
 function confirmEnd(){
