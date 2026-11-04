@@ -109,12 +109,17 @@ Every **Submit** is saved twice: once as the plain source file, and once as a sm
 | Coding | Longest Run After One Flip (Easy) | SDE-1 Intern OA 2026 |
 | Coding | Palindrome-Ready Subsequences (Medium) | 2026 Intern OA, IIIT Delhi, 4 July |
 | Coding | Even Blocks of At Most Two (Hard) | 2026 Intern OA, IIIT Delhi, 4 July |
+| Coding | Pairs With Sum Divisible by X (Easy) | 2024 online OA (HackerRank) |
+| Coding | Minimise the Maximum Load (Medium) | 2024 online OA (HackerRank) |
+| Coding | Largest Potential Outlier (Easy) | 2024 online OA (HackerRank) |
+| Coding | Capable Tournament Winners (Medium) | 2024 online OA (HackerRank) |
+| Coding | Fewest Wildcards in a Common Pattern (Medium) | 2024 online OA (HackerRank) |
 | Repo debugging | **MovieDB Watchlist (MERN)** | SDE Intern OA 2026, section 2 |
 | Situational judgement | 12 workplace scenarios | Section 3 (scenarios written for this mock) |
 
 Amazon's coding questions are **LeetCode-style**. You complete `class Solution` (or a function in JavaScript) in any of the four languages and return the answer. A hidden driver reads the input and prints your result, so Run, Submit and Custom input work as usual.
 
-**Formats:** SDE Intern OA 2026 (all 3 sections, 120 min) · IIITD coding set (70 min) · Debugging section (60 min) · Custom.
+**Formats:** SDE Intern OA 2026 (all 3 sections, 120 min) · IIITD coding set (70 min) · Online coding set 2024 (5 questions, 150 min) · Debugging section (60 min) · Custom.
 
 The **repo-debugging** question recreates the real task. You get the watchlist controller, rate limiter and routes with the bugs reported from the OA: the list never shows added movies, removal doesn't delete, the status check returns the wrong type, and the "10 operations per 2 minutes" rate limiter is broken and not wired in. It runs against an in-memory Express/Mongo stand-in with 10 integration tests. Server logs appear as `[log]` lines.
 

@@ -24,6 +24,18 @@
       ]
     },
     {
+      "file": "online-coding-2024.md",
+      "original": "30 candidate screenshots of Amazon's 2024 online OAs (HackerRank test rfe1p4jtmt)",
+      "format": "markdown",
+      "used_by": [
+        "findpairs",
+        "parcels",
+        "outlier",
+        "winners",
+        "qmarks"
+      ]
+    },
+    {
       "file": "moviedb-watchlist.md",
       "original": "PDF Gallery_20260906_153302.pdf (32 photos of the test IDE)",
       "format": "markdown",

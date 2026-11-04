@@ -8,6 +8,11 @@
   "ioRule": "Coding questions are LeetCode-style: complete the given function and return the answer. Input and output are handled for you, so don't print anything yourself: extra output counts as a wrong answer.",
   "custom": [
     "flip",
+    "findpairs",
+    "parcels",
+    "outlier",
+    "winners",
+    "qmarks",
     "watchlist",
     "sjt"
   ],
@@ -41,6 +46,28 @@
         ]
       ]
     },
+    "online2024": {
+      "name": "Online coding set 2024",
+      "desc": "Five coding questions reported from Amazon's 2024 online OAs (HackerRank) · 150 min",
+      "mins": 150,
+      "pools": [
+        [
+          "findpairs"
+        ],
+        [
+          "parcels"
+        ],
+        [
+          "outlier"
+        ],
+        [
+          "winners"
+        ],
+        [
+          "qmarks"
+        ]
+      ]
+    },
     "debug": {
       "name": "Debugging section",
       "desc": "MovieDB watchlist repo: fix the backend until the integration tests pass · 60 min",
@@ -69,6 +96,11 @@
     "flip",
     "palsub",
     "evenrun",
+    "findpairs",
+    "parcels",
+    "outlier",
+    "winners",
+    "qmarks",
     "watchlist",
     "sjt"
   ]
