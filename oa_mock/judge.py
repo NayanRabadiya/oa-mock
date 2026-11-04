@@ -100,6 +100,7 @@ def cxx_args(src, exe, shim=None):
         a += ["-Wl,-stack_size,0x10000000"]   # 256 MB stack for deep recursion
     elif IS_WIN and not GPP_IS_CLANG:
         a += ["-Wl,--stack,268435456"]        # Windows default is 1 MB
+        a += ["-static"]                      # avoid depending on MinGW DLLs not on PATH
     return a + ["-o", exe, src]
 
 
