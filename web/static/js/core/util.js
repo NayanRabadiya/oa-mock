@@ -3,6 +3,8 @@
 
 /* ---------- helpers ---------- */
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const TRUNC_AT = 4000;
+const trunc = s => { s = String(s); return s.length > TRUNC_AT ? s.slice(0, TRUNC_AT) + `\n… truncated, ${s.length - TRUNC_AT} more characters` : s; };
 const $ = s => document.querySelector(s);
 const norm = s => String(s).replace(/\r/g,"").split("\n").map(l => l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"").replace(/^\n+/,"");
 const fmtTime = ms => { ms = Math.max(0, ms); const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60; return (h ? h+":" : "") + String(m).padStart(2,"0") + ":" + String(x).padStart(2,"0"); };

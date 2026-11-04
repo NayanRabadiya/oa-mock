@@ -143,6 +143,8 @@ body.dragging{user-select:none;cursor:grabbing}
 .tc pre.err{color:var(--bad)}
 .grid-tests{display:flex;flex-wrap:wrap;gap:6px}
 .grid-tests span{font:600 12px var(--f-mono);padding:4px 8px;border-radius:4px}
+.grid-tests span[data-tc]{cursor:pointer}
+.grid-tests span[data-tc]:hover,.grid-tests span[data-tc]:focus-visible{outline:2px solid var(--muted);outline-offset:1px}
 
 /* report */
 .score-big{font:700 clamp(44px,8vw,64px)/1 var(--f-head);font-variant-numeric:tabular-nums}
