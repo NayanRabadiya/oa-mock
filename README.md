@@ -149,4 +149,8 @@ setup.sh, setup.ps1/.bat   one-shot installers; start.sh / start.bat launch
 - **Amazon** is generated: edit the files in `tools/amazon/`, then run `python3 tools/amazon/build.py` (needs `node` and `g++`).
 - **Sources:** keep original PDFs and photos in `raw-sources/` (git-ignored), and commit only text/JSON transcriptions under `sources/`.
 
+## Contributing
+
+Sat an OA recently? Add it. Fork the repo, put your questions in `data/<company>/` (an LLM can do most of the writing from your notes), check them with `tools/check_refs.py`, and open a pull request. [CONTRIBUTING.md](CONTRIBUTING.md) has the format, a checklist and a ready-made LLM prompt. The more people add, the more useful this is for everyone.
+
 The questions are paraphrased from candidates' reports and are for personal practice only.
