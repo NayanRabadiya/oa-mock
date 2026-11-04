@@ -96,10 +96,11 @@ CFG = {
     "headline": "Sit a timed Amazon OA, then see what passed.",
     "blurb": "questions reported from Amazon's 2026 SDE intern OAs: coding, a repo-debugging task and situational judgement",
     "defaultFmt": "sde",
-    "ioRule": "Coding questions are LeetCode-style: complete the given function and return the answer. Input and output are handled for you, so don't print anything yourself: extra output counts as a wrong answer.", "custom": ["flip", "watchlist", "sjt"],
+    "ioRule": "Coding questions are LeetCode-style: complete the given function and return the answer. Input and output are handled for you, so don't print anything yourself: extra output counts as a wrong answer.", "custom": ["flip", "findpairs", "parcels", "outlier", "winners", "qmarks", "watchlist", "sjt"],
     "formats": {
         "sde": {"name": "SDE Intern OA 2026", "desc": "3 sections: coding (Longest Run After One Flip), MovieDB repo debugging, situational judgement · 120 min", "mins": 120, "pools": [["flip"], ["watchlist"], ["sjt"]]},
         "coding": {"name": "IIITD coding set", "desc": "Palindrome-Ready Subsequences + Even Blocks of At Most Two (IIIT Delhi, 4 July) · 70 min", "mins": 70, "pools": [["palsub"], ["evenrun"]]},
+        "online2024": {"name": "Online coding set 2024", "desc": "Five coding questions reported from Amazon's 2024 online OAs (HackerRank) · 150 min", "mins": 150, "pools": [["findpairs"], ["parcels"], ["outlier"], ["winners"], ["qmarks"]]},
         "debug": {"name": "Debugging section", "desc": "MovieDB watchlist repo: fix the backend until the integration tests pass · 60 min", "mins": 60, "pools": [["watchlist"]]},
         "custom": {"name": "Custom", "desc": "Pick the questions and the time", "mins": 60, "pools": []},
     },
@@ -113,7 +114,7 @@ CFG = {
 # 2. write data/amazon/
 CFG["order"] = [q["id"] for q in QS]
 os.makedirs(os.path.join(OUT, "questions"), exist_ok=True)
-json.dump(CFG, open(os.path.join(OUT, "company.json"), "w"), indent=2, ensure_ascii=False)
+json.dump(CFG, open(os.path.join(OUT, "company.json"), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 for q in QS:
-    json.dump(q, open(os.path.join(OUT, "questions", q["id"] + ".json"), "w"), indent=1, ensure_ascii=False)
+    json.dump(q, open(os.path.join(OUT, "questions", q["id"] + ".json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 print("wrote", OUT, [q["id"] for q in QS])
