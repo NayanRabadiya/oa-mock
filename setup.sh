@@ -120,7 +120,7 @@ cat > start.sh <<'EOF'
 #!/usr/bin/env bash
 # Start the OA mock. Stop it with Ctrl+C (Ctrl+Z only pauses it and keeps the port busy).
 cd "$(dirname "$0")"
-for c in python3 python; do command -v "$c" >/dev/null 2>&1 && exec "$c" oa_mock_local.py "$@"; done
+for c in python3 python; do command -v "$c" >/dev/null 2>&1 && exec "$c" run.py "$@"; done
 echo "Python 3 not found. Run ./setup.sh first."; exit 1
 EOF
 chmod +x start.sh
@@ -129,5 +129,5 @@ ok "Start the mock any time with ./start.sh (stop it with Ctrl+C)."
 
 if [ "$START" = 1 ]; then
   echo
-  exec "$PY" oa_mock_local.py
+  exec "$PY" run.py
 fi

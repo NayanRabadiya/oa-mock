@@ -1,0 +1,43 @@
+{
+  "about": "Text/JSON transcriptions of the source material behind data/amazon/. The original PDFs and notes are not kept in this repository.",
+  "sources": [
+    {
+      "file": "sde-intern-2026-oa.md",
+      "original": "Amazon SDE 2026 OA.pdf (2-page candidate write-up)",
+      "format": "markdown",
+      "used_by": [
+        "flip",
+        "watchlist (debugging section outline)",
+        "sjt (section outline)"
+      ],
+      "offlist": [
+        "Return/Risk Evaluation System"
+      ]
+    },
+    {
+      "file": "iiitd-2026-07-04.md",
+      "original": "mock_amazon.txt (note from IIIT Delhi, 4 July)",
+      "format": "markdown",
+      "used_by": [
+        "evenrun",
+        "palsub"
+      ]
+    },
+    {
+      "file": "moviedb-watchlist.md",
+      "original": "PDF Gallery_20260906_153302.pdf (32 photos of the test IDE)",
+      "format": "markdown",
+      "used_by": [
+        "watchlist"
+      ]
+    },
+    {
+      "file": "moviedb-watchlist-api.json",
+      "original": "README.md shown in those photos",
+      "format": "json",
+      "used_by": [
+        "watchlist"
+      ]
+    }
+  ]
+}

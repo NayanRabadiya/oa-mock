@@ -1,0 +1,75 @@
+{
+  "key": "amz",
+  "name": "Amazon OA Mock",
+  "tagline": "SDE Intern 2026: coding · repo debugging · situational judgement",
+  "headline": "Sit a timed Amazon OA, then see what passed.",
+  "blurb": "questions reported from Amazon's 2026 SDE intern OAs: coding, a repo-debugging task and situational judgement",
+  "defaultFmt": "sde",
+  "ioRule": "Coding questions are LeetCode-style: complete the given function and return the answer. Input and output are handled for you, so don't print anything yourself: extra output counts as a wrong answer.",
+  "custom": [
+    "flip",
+    "watchlist",
+    "sjt"
+  ],
+  "formats": {
+    "sde": {
+      "name": "SDE Intern OA 2026",
+      "desc": "3 sections: coding (Longest Run After One Flip), MovieDB repo debugging, situational judgement · 120 min",
+      "mins": 120,
+      "pools": [
+        [
+          "flip"
+        ],
+        [
+          "watchlist"
+        ],
+        [
+          "sjt"
+        ]
+      ]
+    },
+    "coding": {
+      "name": "IIITD coding set",
+      "desc": "Palindrome-Ready Subsequences + Even Blocks of At Most Two (IIIT Delhi, 4 July) · 70 min",
+      "mins": 70,
+      "pools": [
+        [
+          "palsub"
+        ],
+        [
+          "evenrun"
+        ]
+      ]
+    },
+    "debug": {
+      "name": "Debugging section",
+      "desc": "MovieDB watchlist repo: fix the backend until the integration tests pass · 60 min",
+      "mins": 60,
+      "pools": [
+        [
+          "watchlist"
+        ]
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 60,
+      "pools": []
+    }
+  },
+  "offlist": [
+    {
+      "t": "Return/Risk Evaluation System (repo debugging)",
+      "s": "Amazon SDE-1 Intern OA 2026 · section 2",
+      "why": "Only an outline was shared (7+ files, return-window checks, linked accounts, risk scoring, approve/review/reject decisions, 6 integrated tests). The MovieDB question practises the same read-trace-fix workflow."
+    }
+  ],
+  "order": [
+    "flip",
+    "palsub",
+    "evenrun",
+    "watchlist",
+    "sjt"
+  ]
+}

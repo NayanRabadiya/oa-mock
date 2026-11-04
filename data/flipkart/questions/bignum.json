@@ -1,0 +1,64 @@
+{
+ "id": "bignum",
+ "title": "Largest Merged Code",
+ "diff": "Hard",
+ "src": "Flipkart SDE OA",
+ "body": "<p>You have two lists of digits. Build the largest possible number of exactly <code>k</code> digits by choosing digits from both lists. Digits taken from the same list must keep their original relative order, but you can interleave the two lists however you like.</p><p>Print the digits of the largest number.</p>",
+ "inp": "Line 1: <code>m</code>. Line 2: <code>m</code> digits. Line 3: <code>n</code>. Line 4: <code>n</code> digits. Line 5: <code>k</code>.",
+ "out": "<code>k</code> digits separated by spaces.",
+ "cons": [
+  "1 ≤ m, n ≤ 100",
+  "1 ≤ k ≤ m + n"
+ ],
+ "samples": [
+  {
+   "in": "5\n3 4 6 5 7\n4\n8 2 5 6\n5",
+   "out": "8 7 2 5 6",
+   "ex": "Take [7] from the first list and [8, 2, 5, 6] from the second. Merged: 8 7 2 5 6."
+  },
+  {
+   "in": "4\n3 4 6 5\n6\n9 1 2 5 8 3\n5",
+   "out": "9 8 6 5 3",
+   "ex": "[6, 5] from the first list and [9, 8, 3] from the second."
+  }
+ ],
+ "hidden": [
+  {
+   "in": "1\n5\n1\n5\n2",
+   "out": "5 5"
+  },
+  {
+   "in": "3\n9 9 9\n2\n9 9\n4",
+   "out": "9 9 9 9"
+  },
+  {
+   "in": "3\n1 2 3\n3\n1 2 3\n6",
+   "out": "1 2 3 1 2 3"
+  },
+  {
+   "in": "6\n3 9 4 3 0 8\n5\n5 9 1 5 6\n8",
+   "out": "9 9 5 6 4 3 0 8"
+  },
+  {
+   "in": "20\n1 4 6 9 6 1 0 7 2 9 9 7 4 5 3 4 9 4 9 3\n20\n8 2 1 6 2 6 6 8 2 8 4 5 3 0 3 3 7 7 7 1\n16",
+   "out": "9 9 9 9 9 8 8 8 5 3 3 7 7 7 3 1"
+  },
+  {
+   "in": "50\n6 7 7 6 7 6 6 6 6 6 7 7 7 6 7 6 7 7 7 7 7 6 7 7 7 6 7 7 6 7 7 7 7 7 7 6 6 7 6 7 7 7 7 7 6 6 6 6 7 6\n40\n7 6 6 6 6 6 7 7 7 6 7 6 7 7 6 6 7 6 6 6 7 6 6 7 7 7 7 7 6 6 7 6 7 7 6 6 6 6 6 7\n7",
+   "out": "7 7 7 7 7 7 7"
+  },
+  {
+   "in": "100\n3 3 9 7 0 9 8 5 8 4 3 6 2 1 4 9 7 8 1 5 1 0 7 6 8 1 2 7 0 4 9 3 6 5 2 5 0 2 0 6 8 4 7 9 3 7 9 5 0 5 1 9 9 0 6 7 1 9 1 7 3 3 8 4 0 0 7 3 3 6 8 6 6 7 0 7 4 9 1 3 2 2 1 4 3 3 3 8 7 5 5 5 7 2 1 9 6 4 3 6\n100\n3 4 6 2 2 8 5 7 1 5 9 2 7 1 5 8 1 5 5 9 0 6 1 3 9 7 3 7 2 6 6 3 6 6 3 3 7 0 7 0 9 3 8 2 7 1 6 8 7 3 8 6 5 9 1 1 0 5 7 5 5 3 9 3 2 6 8 8 6 5 9 8 8 8 0 8 9 3 9 3 0 2 4 9 9 4 7 9 9 4 4 8 4 9 5 3 3 7 9 5\n131",
+   "out": "9 9 9 9 9 9 9 9 9 9 9 7 7 6 7 2 6 6 3 6 6 3 3 7 1 9 1 7 3 3 8 4 0 7 0 9 3 8 2 7 1 6 8 7 3 8 6 5 9 1 1 0 5 7 5 5 3 9 3 2 6 8 8 6 5 9 8 8 8 0 8 9 3 9 3 0 2 4 9 9 4 7 9 9 4 4 8 4 9 5 3 3 7 9 5 0 0 7 3 3 6 8 6 6 7 0 7 4 9 1 3 2 2 1 4 3 3 3 8 7 5 5 5 7 2 1 9 6 4 3 6"
+  },
+  {
+   "in": "100\n0 4 1 5 2 2 9 5 6 9 4 3 7 9 7 7 6 7 7 3 1 3 0 6 9 1 5 5 8 9 0 1 2 4 9 1 5 3 8 8 2 6 0 6 1 0 1 6 2 7 1 5 0 9 8 0 6 5 7 6 5 7 7 5 8 6 7 1 1 8 2 8 7 1 8 3 8 0 9 2 9 9 9 9 1 7 0 4 2 7 6 7 6 2 4 0 2 2 7 4\n80\n5 5 6 8 0 3 3 8 2 0 8 3 2 7 5 9 7 3 6 2 8 8 3 1 4 9 0 2 7 6 5 1 8 5 1 8 6 8 5 2 9 5 9 9 4 5 0 1 9 8 5 0 1 9 4 9 6 0 2 0 9 6 2 4 1 9 5 5 8 5 5 5 8 5 3 0 8 9 3 4\n19",
+   "out": "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+  }
+ ],
+ "type": "code",
+ "ref": "import sys, heapq\nfrom collections import defaultdict\n\ndef bignum(s):\n    t=list(map(int,s.split())); m=t[0]; A=t[1:1+m]; n=t[1+m]; B=t[2+m:2+m+n]; k=t[2+m+n]\n    def pick(a,c):\n        drop=len(a)-c; st=[]\n        for x in a:\n            while drop and st and st[-1]<x: st.pop(); drop-=1\n            st.append(x)\n        return st[:c]\n    def merge(a,b):\n        r=[]\n        while a or b:\n            if a>b: r.append(a.pop(0))\n            else: r.append(b.pop(0))\n        return r\n    best=[]\n    for i in range(max(0,k-n),min(k,m)+1):\n        best=max(best,merge(pick(A,i),pick(B,k-i)))\n    return \" \".join(map(str,best))\n\nprint(bignum(sys.stdin.read()))\n",
+ "refcpp": "#include <bits/stdc++.h>\nusing namespace std;\nvector<int> best(const vector<int>& a,int c){ vector<int> st; int drop=a.size()-c; for(int x:a){ while(drop&&!st.empty()&&st.back()<x){st.pop_back();drop--;} st.push_back(x);} st.resize(c); return st; }\nvector<int> mergeV(vector<int> a, vector<int> b){ vector<int> r; size_t i=0,j=0; while(i<a.size()||j<b.size()){\n  if(lexicographical_compare(b.begin()+j,b.end(),a.begin()+i,a.end())) r.push_back(a[i++]); else r.push_back(b[j++]); } return r; }\nint main(){ int m; cin>>m; vector<int> A(m); for(auto&x:A)cin>>x; int n; cin>>n; vector<int> B(n); for(auto&x:B)cin>>x; int k; cin>>k;\n  vector<int> ans; for(int i=max(0,k-n);i<=min(k,m);i++){ auto c=mergeV(best(A,i),best(B,k-i)); if(c>ans) ans=c; }\n  for(int i=0;i<k;i++) cout<<ans[i]<<(i+1<k?\" \":\"\\n\"); }\n",
+ "lc": "321 Create Maximum Number",
+ "lcurl": "https://leetcode.com/problems/create-maximum-number/"
+}

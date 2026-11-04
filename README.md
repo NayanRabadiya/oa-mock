@@ -44,7 +44,7 @@ Linux setup supports apt, dnf, yum, pacman, zypper and apk (with `sudo`). Option
 setup.bat -NoJava -NoStart
 ```
 
-**No scripts?** If you have Python, just run `python3 oa_mock_local.py` (`py oa_mock_local.py` on Windows). Set `OA_PORT=9000` to change the port.
+**No scripts?** If you have Python, just run `python3 run.py` (`py run.py` on Windows). Options: `--port 9000`, `--no-browser`. You can also set `OA_PORT`.
 
 ---
 
@@ -104,19 +104,49 @@ The *Return/Risk Evaluation* repo task is listed but can't be run, because only 
 | `OSError: Address already in use` | An older runner is still running, often because **Ctrl+Z** paused it instead of stopping it. Run `kill %1` or `lsof -ti tcp:8765 \| xargs kill`. The runner also falls back to the next free port. Always stop it with **Ctrl+C**. |
 | "No C++ compiler found" | Run setup again. On Windows, open a **new** terminal after installing so `g++` is on your PATH. On macOS, finish the Command Line Tools installer and re-run `./setup.sh`. |
 | Java not detected on macOS | `brew install openjdk`, then run the `sudo ln -sfn …` command that brew prints. |
-| Page opened as a file, not through the runner | Python and JavaScript still work in the browser, but C++ and Java need the runner. Start `oa_mock_local.py` and use the `127.0.0.1` address. |
+| Blank page or "not found" | Open the mock through the server (`python3 run.py`), at the `127.0.0.1` address it prints. Opening the HTML files directly won't work. |
 
 ---
 
-## Repository layout
+## How it's built
+
+A small web app with a Python standard-library backend. There's nothing to `pip install` or `npm install`.
 
 ```
-oa_mock_local.py      the runner: a stdlib-only Python web server with all three test pages embedded
-setup.sh              macOS / Linux setup
-setup.ps1, setup.bat  Windows setup (double-click the .bat)
-start.sh, start.bat   launchers
-docs/                 screenshots
-Amazon SDE 2026 OA.pdf, PDF Gallery_*.pdf, mock_amazon.txt   source notes for the Amazon bank
+run.py                     entry point (python3 run.py [--port N] [--no-browser])
+oa_mock/                   backend (Python 3.8+, stdlib only)
+  __main__.py              start-up: prints compilers, binds 127.0.0.1, opens the browser
+  server.py                HTTP routes: pages, static files, /api/companies, POST /run
+  judge.py                 compiles and runs code: g++/clang (C++17), javac/java, Python
+  data.py                  loads data/<company>/, reloading when files change
+web/                       frontend (plain HTML/CSS/JS, no build step)
+  index.html, app.html     company picker; the test app (one template for every company)
+  static/css/              app.css, index.css
+  static/js/core/          config.js (data, languages, saved state), util.js
+  static/js/run/           workers.js (JavaScript answers in a Web Worker), sql.js, judge.js (calls /run, grades)
+  static/js/exam/          session.js (start/end, editor), panels.js, controls.js (timer, navigation, Run/Submit)
+  static/js/views/         render.js, home.js, exam.js, report.js
+  static/js/main.js        global listeners and first render (loaded last)
+  static/vendor/           CodeMirror 5 and AlaSQL, both MIT
+data/<company>/            question banks
+  company.json             name, test formats, question order, unrunnable entries
+  questions/<id>.json      statement, samples, hidden tests, reference solutions, stubs/drivers
+sources/                   text/JSON transcriptions of the source material (no PDFs or photos)
+tools/
+  check_refs.py            runs every reference solution against its tests
+  amazon/                  generators that build data/amazon/ (statements, tests, debugging repo, SJT)
+setup.sh, setup.ps1/.bat   one-shot installers; start.sh / start.bat launch
 ```
+
+**Request flow.** `GET /amazon` renders `web/app.html`, which loads the vendored editor, then `/api/companies/amazon/data.js` (that company's config and questions), then the app scripts. C++, Java and Python answers are sent to `POST /run`. The server compiles and runs them and returns stdout, stderr and timings, and the page grades them against the tests. JavaScript answers and the debugging repo run in a Web Worker in the page. The server only listens on `127.0.0.1`, checks the `Host` header, and requires a per-run token on `/run`.
+
+### Adding or editing questions
+
+- **Edit:** change `data/<company>/questions/<id>.json` and reload the page. The server picks up changed files automatically.
+- **Add a question:** create `questions/<id>.json` (copy an existing one as a template) and add the id to `order` in `company.json`. Mention it in a format's `pools` to include it in a test.
+- **Add a company:** create `data/<key>/company.json` and `data/<key>/questions/`. It appears on the home page automatically.
+- **Check:** run `python3 tools/check_refs.py [company]`. Every Python and C++ reference must pass its tests.
+- **Amazon** is generated: edit the files in `tools/amazon/`, then run `python3 tools/amazon/build.py` (needs `node` and `g++`).
+- **Sources:** keep original PDFs and photos in `raw-sources/` (git-ignored), and commit only text/JSON transcriptions under `sources/`.
 
 The questions are paraphrased from candidates' reports and are for personal practice only.

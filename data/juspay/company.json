@@ -1,0 +1,156 @@
+{
+  "key": "jp",
+  "name": "Juspay OA Mock",
+  "tagline": "Converging Maze · HackerEarth · Unstop challenge · Elimination round",
+  "headline": "Sit a timed Juspay OA, then see what passed.",
+  "blurb": "questions reported from Juspay OAs and elimination rounds (HackerEarth, Rookies World, the Unstop hiring challenge and live coding rounds)",
+  "defaultFmt": "maze",
+  "custom": [
+    "reach",
+    "cyclesum",
+    "treelock"
+  ],
+  "formats": {
+    "maze": {
+      "name": "Converging Maze",
+      "desc": "Rookies World set: Largest Sum Cycle, Maximum Weight Node, Nearest Meeting Cell · 90 min",
+      "mins": 90,
+      "pools": [
+        [
+          "cyclesum"
+        ],
+        [
+          "maxweight"
+        ],
+        [
+          "meeting"
+        ]
+      ]
+    },
+    "he": {
+      "name": "HackerEarth graph set",
+      "desc": "Reachability + Shortest Time on one network · 80 min",
+      "mins": 80,
+      "pools": [
+        [
+          "reach"
+        ],
+        [
+          "fastest"
+        ]
+      ]
+    },
+    "unstop": {
+      "name": "Unstop challenge",
+      "desc": "Part A Tree of Space, then one Part B and one Part C question · 120 min",
+      "mins": 120,
+      "pools": [
+        [
+          "treelock"
+        ],
+        [
+          "magical",
+          "factory",
+          "rebels",
+          "vineyard"
+        ],
+        [
+          "parking",
+          "cycling",
+          "hiker",
+          "equalize"
+        ]
+      ]
+    },
+    "elim": {
+      "name": "Elimination round",
+      "desc": "2 live-coding questions · 60 min",
+      "mins": 60,
+      "pools": [
+        [
+          "leader",
+          "workers",
+          "openlock",
+          "calc",
+          "inversions",
+          "puddles"
+        ],
+        [
+          "leader",
+          "workers",
+          "openlock",
+          "calc",
+          "inversions",
+          "puddles"
+        ]
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 60,
+      "pools": []
+    }
+  },
+  "offlist": [
+    {
+      "t": "The Nagging React Newbie (min cut)",
+      "s": "Juspay OA (HackerEarth, Q1)",
+      "why": "The statement is loose and the platform said its own solution was out of date; the sample fits two readings. Practise the min-cut version on CSES.",
+      "link": "https://cses.fi/problemset/task/1695"
+    },
+    {
+      "t": "Sync Engine",
+      "s": "Juspay OA (two campuses)",
+      "why": "The statement was cut off at the UPDATE rule and no input or output format was shared."
+    },
+    {
+      "t": "Tree of Space Part B: thread-safe lock",
+      "s": "Juspay Hackathon B",
+      "why": "A concurrency discussion with the interviewer, not an auto-graded test.",
+      "link": "https://leetcode.com/discuss/post/3261455/Juspay-Tree-of-space-Hackathon-part-B-complete-discussion/"
+    },
+    {
+      "t": "Array queries: minimum power to the nearest end",
+      "s": "Juspay elimination (2025)",
+      "why": "The exact statement was not shared."
+    },
+    {
+      "t": "Corporate Restructuring, Power Grid Management, Smart City Traffic System, Network Technician's Mission, Cloud Network Bandwidth Pricing",
+      "s": "Juspay OA",
+      "why": "Only the titles were shared."
+    },
+    {
+      "t": "Coding round: sliding window, a medium, a Fenwick-tree hard",
+      "s": "Juspay SDE-1 (Mar 2026)",
+      "why": "Statements not shared."
+    },
+    {
+      "t": "System design: parking lot, room booking, TTL key-value store, MCQs and puzzles",
+      "s": "Juspay later rounds",
+      "why": "Discussion rounds, not coding tests."
+    }
+  ],
+  "order": [
+    "reach",
+    "fastest",
+    "cyclesum",
+    "maxweight",
+    "meeting",
+    "treelock",
+    "parking",
+    "rebels",
+    "magical",
+    "cycling",
+    "factory",
+    "vineyard",
+    "hiker",
+    "equalize",
+    "leader",
+    "workers",
+    "openlock",
+    "calc",
+    "inversions",
+    "puddles"
+  ]
+}

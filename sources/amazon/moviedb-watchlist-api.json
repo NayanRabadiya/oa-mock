@@ -1,0 +1,155 @@
+{
+  "source": "Amazon SDE Intern OA 2026, section 2: README.md of the MovieDB (MERN) watchlist task, transcribed from photos",
+  "auth": "All routes require 'Authorization: Bearer <token>'",
+  "rate_limit": {
+    "applies_to": [
+      "POST /api/watchlist/add",
+      "POST /api/watchlist/remove"
+    ],
+    "limit": 10,
+    "window_minutes": 2,
+    "scope": "per user, add and remove combined",
+    "error": {
+      "status": 429,
+      "message": "Too many watchlist operations. You can add or remove movies up to 10 times within 2 minutes."
+    }
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/watchlist/",
+      "purpose": "Retrieves all movies in the authenticated user's watchlist",
+      "success": {
+        "status": 200,
+        "body_example": [
+          {
+            "_id": "movie_id",
+            "title": "The Shawshank Redemption",
+            "year": 1994,
+            "duration": "2h 22m",
+            "rating": 9.3,
+            "popularity": 98,
+            "genre": [
+              "Drama",
+              "Crime"
+            ],
+            "description": "Two imprisoned men bond over a number of years...",
+            "director": "Frank Darabont",
+            "writers": [
+              "Stephen King",
+              "Frank Darabont"
+            ],
+            "stars": [
+              "Tim Robbins",
+              "Morgan Freeman"
+            ],
+            "type": "movie",
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/watchlist/check/:movieId",
+      "purpose": "Checks if a specific movie is in the user's watchlist",
+      "success": {
+        "status": 200,
+        "body_example": {
+          "inWatchlist": true
+        },
+        "note": "README shows 'inWatchlist'; the controller code returns 'isInWatchlist'"
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Invalid movie ID format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/watchlist/add",
+      "purpose": "Adds a movie to the user's watchlist",
+      "rate_limited": true,
+      "request_body": {
+        "movieId": "movie_id"
+      },
+      "success": {
+        "status": 201,
+        "body": {
+          "message": "Movie added to watchlist successfully"
+        }
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Movie ID is required"
+        },
+        {
+          "status": 400,
+          "message": "Invalid movie ID format"
+        },
+        {
+          "status": 404,
+          "message": "Movie not found"
+        },
+        {
+          "status": 400,
+          "message": "Movie already in watchlist"
+        },
+        {
+          "status": 429,
+          "message": "Too many watchlist operations. You can add or remove movies up to 10 times within 2 minutes."
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/watchlist/remove",
+      "purpose": "Removes a movie from the user's watchlist",
+      "rate_limited": true,
+      "request_body": {
+        "movieId": "movie_id"
+      },
+      "success": {
+        "status": 200,
+        "body": {
+          "message": "Movie removed from watchlist successfully"
+        }
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Movie ID is required"
+        },
+        {
+          "status": 400,
+          "message": "Invalid movie ID format"
+        },
+        {
+          "status": 404,
+          "message": "Movie not found in watchlist"
+        },
+        {
+          "status": 429,
+          "message": "Too many watchlist operations. You can add or remove movies up to 10 times within 2 minutes."
+        }
+      ]
+    }
+  ],
+  "additional_information": [
+    "When movies are added/removed from the watchlist, entries should be created/deleted from the database.",
+    "To manually reset the database, stop the running server and then restart it.",
+    "Running the test cases will also restore the database to its initial state.",
+    "The code repository may intentionally contain other issues that are unrelated to this specific task.",
+    "In Run and Debug mode the frontend may start before the backend (and database seeding) is ready; reload the preview once the backend is up."
+  ],
+  "test_credentials": {
+    "email": "sam.rivera@email.com",
+    "password": "Password@123",
+    "note": "demo account inside the test environment"
+  }
+}

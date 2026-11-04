@@ -70,7 +70,7 @@ else {
 }
 
 # ---------- launcher ----------
-$launcher = "@echo off`r`ncd /d `"%~dp0`"`r`nrem Stop the mock with Ctrl+C.`r`nwhere py >nul 2>nul && (py -3 oa_mock_local.py %* & goto :eof)`r`npython oa_mock_local.py %*`r`n"
+$launcher = "@echo off`r`ncd /d `"%~dp0`"`r`nrem Stop the mock with Ctrl+C.`r`nwhere py >nul 2>nul && (py -3 run.py %* & goto :eof)`r`npython run.py %*`r`n"
 Set-Content -Path (Join-Path $PSScriptRoot "start.bat") -Value $launcher -Encoding ASCII -NoNewline
 Step "Done"
 Ok "Start the mock any time by double-clicking start.bat (stop it with Ctrl+C)."
@@ -78,5 +78,5 @@ Ok "If a compiler was just installed and isn't detected, close this window and o
 
 if (-not $NoStart) {
   Write-Host ""
-  & $pyExe @pyArgs oa_mock_local.py
+  & $pyExe @pyArgs run.py
 }

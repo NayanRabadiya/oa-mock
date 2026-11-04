@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{{title}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/static/vendor/codemirror/codemirror.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <style>:root{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+  <script>window.LOCAL_JUDGE = true; window.LOCAL_TOKEN = {{token}};</script>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="modal" class="modal" hidden></div>
+
+  <!-- third-party: CodeMirror 5 (editor) and AlaSQL (SQL questions), both MIT -->
+  <script src="/static/vendor/codemirror/codemirror.js"></script>
+  <script src="/static/vendor/codemirror/python.js"></script>
+  <script src="/static/vendor/codemirror/javascript.js"></script>
+  <script src="/static/vendor/codemirror/sql.js"></script>
+  <script src="/static/vendor/codemirror/clike.js"></script>
+  <script src="/static/vendor/codemirror/matchbrackets.js"></script>
+  <script src="/static/vendor/codemirror/closebrackets.js"></script>
+  <script src="/static/vendor/alasql/alasql.min.js"></script>
+
+  <!-- this company's questions and config, from data/{{company}}/ -->
+  <script src="/api/companies/{{company}}/data.js"></script>
+
+  <!-- the app; order matters: core first, main last -->
+  <script src="/static/js/core/config.js"></script>
+  <script src="/static/js/core/util.js"></script>
+  <script src="/static/js/run/workers.js"></script>
+  <script src="/static/js/run/sql.js"></script>
+  <script src="/static/js/run/judge.js"></script>
+  <script src="/static/js/exam/session.js"></script>
+  <script src="/static/js/views/render.js"></script>
+  <script src="/static/js/views/home.js"></script>
+  <script src="/static/js/views/exam.js"></script>
+  <script src="/static/js/exam/panels.js"></script>
+  <script src="/static/js/exam/controls.js"></script>
+  <script src="/static/js/views/report.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

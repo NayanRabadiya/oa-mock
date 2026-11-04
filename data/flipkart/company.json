@@ -1,0 +1,97 @@
+{
+  "key": "fk",
+  "name": "Flipkart OA Mock",
+  "tagline": "SDE · Data Engineer · UI Engineer",
+  "headline": "Sit a timed Flipkart OA, then see what passed.",
+  "blurb": "questions reported from Flipkart OAs (SDE, Data Engineer and UI Engineer)",
+  "defaultFmt": "sde",
+  "custom": [
+    "houses",
+    "snake",
+    "robots"
+  ],
+  "formats": {
+    "sde": {
+      "name": "SDE",
+      "desc": "3 coding questions (Easy, Medium, Hard) · 90 min",
+      "mins": 90,
+      "pools": [
+        "Easy",
+        "Medium",
+        "Hard"
+      ]
+    },
+    "de": {
+      "name": "Data Engineer",
+      "desc": "3 coding + 1 SQL · 90 min · Python, Java or SQL in the real test",
+      "mins": 90,
+      "pools": [
+        "Easy",
+        "Medium",
+        "Hard",
+        [
+          "sql"
+        ]
+      ]
+    },
+    "ui": {
+      "name": "UI Engineer",
+      "desc": "Priority Colouring, Failure Cascade + 1 more · 90 min",
+      "mins": 90,
+      "pools": [
+        [
+          "colour"
+        ],
+        [
+          "cascade"
+        ],
+        "Hard"
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 60,
+      "pools": []
+    }
+  },
+  "offlist": [
+    {
+      "t": "Chef and a Complete Graph",
+      "s": "Flipkart Data Engineer OA",
+      "why": "Only the CodeChef link was shared. Solve it on CodeChef.",
+      "link": "https://www.codechef.com/problems/KCONNECT"
+    },
+    {
+      "t": "Subgraphs",
+      "s": "Flipkart Data Engineer OA",
+      "why": "Only the name was reported; it may be the CodeChef question above."
+    },
+    {
+      "t": "Kotlin-only question",
+      "s": "Flipkart UI Engineer OA (IIT Bombay)",
+      "why": "The statement was not shared."
+    },
+    {
+      "t": "Building on a plot with trees",
+      "s": "Flipkart Data Engineer OA (IIT BHU, handwritten)",
+      "why": "Too incomplete to grade: it doesn't say which rotations are allowed or what cutting a tree means."
+    }
+  ],
+  "order": [
+    "houses",
+    "poscode",
+    "indeg",
+    "colour",
+    "snake",
+    "racing",
+    "cascade",
+    "bags",
+    "robots",
+    "ads",
+    "bignum",
+    "sayclap",
+    "island",
+    "sql"
+  ]
+}

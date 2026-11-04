@@ -1,0 +1,68 @@
+{
+ "id": "workers",
+ "title": "Minimise the Busiest Worker",
+ "diff": "Hard",
+ "src": "Juspay elimination interview (Mar 2025)",
+ "body": "<p>Assign each of <code>n</code> jobs to one of <code>k</code> workers. A worker's load is the sum of their jobs' times. Jobs need not be contiguous. Print the smallest possible load of the busiest worker.</p>",
+ "inp": "Line 1: <code>n k</code>. Line 2: the <code>n</code> job times.",
+ "out": "One integer.",
+ "cons": [
+  "1 ≤ k ≤ n ≤ 12",
+  "1 ≤ time ≤ 10<sup>7</sup>"
+ ],
+ "samples": [
+  {
+   "in": "5 2\n1 2 4 7 8",
+   "out": "11",
+   "ex": "{1, 2, 8} and {4, 7}."
+  },
+  {
+   "in": "5 2\n5 5 4 4 4",
+   "out": "12",
+   "ex": "{4, 4, 4} and {5, 5}. A greedy \"give it to the least loaded worker\" gives 13."
+  }
+ ],
+ "lc": "1723 Find Minimum Time to Finish All Jobs",
+ "type": "code",
+ "hidden": [
+  {
+   "in": "1 1\n9",
+   "out": "9"
+  },
+  {
+   "in": "3 3\n3 2 3",
+   "out": "3"
+  },
+  {
+   "in": "4 1\n1 2 3 4",
+   "out": "10"
+  },
+  {
+   "in": "6 2\n1481732 7988883 5740028 7798739 8261953 7624597",
+   "out": "21163364"
+  },
+  {
+   "in": "8 3\n2776682 6876130 5984087 1100209 504163 9024143 9330830 5399072",
+   "out": "14423215"
+  },
+  {
+   "in": "10 4\n6763686 961065 3478596 2847771 4528230 9664667 1584122 9817371 2599484 9578315",
+   "out": "13143263"
+  },
+  {
+   "in": "12 3\n9309783 6484838 2265030 2095116 4220911 9702020 5825654 2825705 51026 175241 8641215 1606997",
+   "out": "17792704"
+  },
+  {
+   "in": "12 5\n3879848 7263078 2560363 8903671 1328463 8594267 3133695 527650 3214345 917824 270010 1286694",
+   "out": "8903671"
+  },
+  {
+   "in": "12 2\n1068829 9906126 5895870 8251715 8891626 811029 7502468 4486024 6235754 2422605 9566692 9726077",
+   "out": "37407635"
+  }
+ ],
+ "ref": "import sys, heapq\nfrom collections import defaultdict, deque\nsys.setrecursionlimit(1 << 20)\n\ndef workers(s):\n    t = list(map(int, s.split())); n, k = t[0], t[1]; jobs = sorted(t[2:2+n], reverse=True)\n    best = [sum(jobs)]; load = [0]*k\n    def go(i, cur):\n        if cur >= best[0]: return\n        if i == n: best[0] = cur; return\n        seen = set()\n        for w in range(k):\n            if load[w] in seen: continue\n            seen.add(load[w]); load[w] += jobs[i]\n            go(i + 1, max(cur, load[w])); load[w] -= jobs[i]\n    go(0, 0)\n    return str(best[0])\n\nprint(workers(sys.stdin.read()))\n",
+ "refcpp": "#include <bits/stdc++.h>\nusing namespace std;\n// subset DP: dp[k][mask] = min possible max load splitting mask among k workers\nint main(){ int n,k; cin>>n>>k; vector<long long> j(n); for(auto&x:j)cin>>x; int F=1<<n; vector<long long> sum(F,0);\n  for(int s=1;s<F;s++){ int b=__builtin_ctz(s); sum[s]=sum[s&(s-1)]+j[b]; }\n  vector<long long> dp(sum); for(int w=2;w<=k;w++){ vector<long long> nd(F); for(int s=0;s<F;s++){ long long best=dp[s]; for(int t=s;t;t=(t-1)&s) best=min(best,max(dp[s^t],sum[t])); nd[s]=best; } dp=nd; }\n  cout<<dp[F-1]<<\"\\n\"; }\n",
+ "lcurl": "https://leetcode.com/problems/find-minimum-time-to-finish-all-jobs/"
+}
