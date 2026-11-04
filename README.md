@@ -103,6 +103,7 @@ The *Return/Risk Evaluation* repo task is listed but can't be run, because only 
 |---|---|
 | `OSError: Address already in use` | An older runner is still running, often because **Ctrl+Z** paused it instead of stopping it. Run `kill %1` or `lsof -ti tcp:8765 \| xargs kill`. The runner also falls back to the next free port. Always stop it with **Ctrl+C**. |
 | "No C++ compiler found" | Run setup again. On Windows, open a **new** terminal after installing so `g++` is on your PATH. On macOS, finish the Command Line Tools installer and re-run `./setup.sh`. |
+| Windows: C++ "Compilation error" mentioning `fs_path.h` / `filesystem` | An old MinGW (GCC 8.1, from the 2018 installer) is on your PATH, and its C++17 headers are broken. The mock now works around this automatically. For a proper fix, run `setup.bat`: it installs a current GCC alongside the old one, and the mock picks the newest. To force a specific compiler, run `set OA_CXX=C:\path\to\g++.exe` before `start.bat`. |
 | Java not detected on macOS | `brew install openjdk`, then run the `sudo ln -sfn …` command that brew prints. |
 | Blank page or "not found" | Open the mock through the server (`python3 run.py`), at the `127.0.0.1` address it prints. Opening the HTML files directly won't work. |
 

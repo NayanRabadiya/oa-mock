@@ -1,7 +1,8 @@
 """Compiles and runs submitted code with the compilers on this computer.
 
-C++17 uses a real GCC when one is installed (Homebrew g++-NN on macOS) and falls back
-to g++/clang++. Apple clang lacks <bits/stdc++.h>, so a shim header is provided.
+C++17 uses the newest GCC it can find (Homebrew g++-NN on macOS; WinLibs/MSYS2 on Windows),
+then clang++. Set OA_CXX to force a compiler. Apple clang lacks <bits/stdc++.h> and old
+MinGW GCC (< 10) ships a broken one in C++17 mode, so a shim header is used for those.
 Java uses javac/java from a JDK; Python uses the interpreter running this server.
 """
 import glob, os, re, shutil, subprocess, sys, tempfile, time
@@ -16,84 +17,102 @@ def which(*names):
 
 IS_MAC = sys.platform == "darwin"
 
-# bits/stdc++.h for compilers that don't ship it (Apple clang on macOS)
+# bits/stdc++.h replacement, used when the compiler's own one is missing (Apple clang)
+# or broken (MinGW GCC 8/9 on Windows: its <filesystem> doesn't compile in C++17 mode).
 SHIM_HEADERS = """#pragma once
-#include <cassert>
-#include <cctype>
-#include <cfloat>
-#include <climits>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <cstdint>
-#include <algorithm>
-#include <array>
-#include <bitset>
-#include <chrono>
-#include <complex>
-#include <deque>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <istream>
-#include <iterator>
-#include <limits>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <optional>
-#include <ostream>
-#include <queue>
-#include <random>
-#include <set>
-#include <sstream>
-#include <stack>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <variant>
-#include <vector>
-"""
+""" + "".join("#include <%s>\n" % h for h in (
+    "cassert cctype cerrno cfloat cinttypes climits cmath cstdarg cstddef cstdint cstdio cstdlib cstring ctime "
+    "cwchar cwctype algorithm array bitset chrono complex deque exception fstream functional initializer_list "
+    "iomanip ios iosfwd iostream istream iterator limits list locale map memory new numeric optional ostream "
+    "queue random ratio regex set sstream stack stdexcept streambuf string string_view tuple type_traits "
+    "typeinfo unordered_map unordered_set utility valarray variant vector").split())
 
-def _version_key(path):
-    m = re.search(r"(\d+)$", path)
-    return int(m.group(1)) if m else 0
 
-def find_cxx():
-    """Prefer a real GCC (Homebrew g++-NN on macOS); fall back to g++/clang++."""
-    cands = []
+def _gcc_major(path):
+    try:
+        v = subprocess.run([path, "-dumpversion"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=20).stdout.decode().strip()
+        return int(v.split(".")[0])
+    except Exception:
+        return 0
+
+
+def _candidates():
+    """Every C++ compiler we can find, most specific first."""
+    c = []
+    if os.environ.get("OA_CXX"):
+        c.append(os.environ["OA_CXX"])
     for d in ("/opt/homebrew/bin", "/usr/local/bin", "/home/linuxbrew/.linuxbrew/bin"):
-        cands += sorted(glob.glob(os.path.join(d, "g++-[0-9]*")), key=_version_key, reverse=True)
+        c += glob.glob(os.path.join(d, "g++-[0-9]*"))
+    if IS_WIN:
+        la = os.environ.get("LOCALAPPDATA", "")
+        c += glob.glob(os.path.join(la, "Microsoft", "WinGet", "Links", "g++.exe"))
+        c += glob.glob(os.path.join(la, "Microsoft", "WinGet", "Packages", "BrechtSanders.WinLibs*", "mingw*", "bin", "g++.exe"))
+        for root in ("C:\\msys64", "C:\\mingw64", "C:\\mingw-w64"):
+            c += glob.glob(os.path.join(root, "*", "bin", "g++.exe")) + glob.glob(os.path.join(root, "bin", "g++.exe"))
     for n in ["g++-%d" % v for v in range(16, 9, -1)] + ["g++", "clang++"]:
         p = shutil.which(n)
-        if p: cands.append(p)
-    for c in cands:
+        if p:
+            c.append(p)
+    seen, out = set(), []
+    for p in c:
+        k = os.path.normcase(os.path.realpath(p))
+        if k not in seen and os.path.isfile(p):
+            seen.add(k); out.append(p)
+    return out
+
+
+def find_cxx():
+    """The compiler to use: OA_CXX if set, else the newest real GCC, else clang.
+
+    Returns (path, is_clang, gcc_major, first line of --version)."""
+    best = None
+    for c in _candidates():
         try:
             v = subprocess.run([c, "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=20).stdout.decode("utf-8", "replace")
         except Exception:
             continue
-        return c, ("clang" in v.lower() or "apple" in v.lower()), v.splitlines()[0] if v else c
-    return None, False, ""
+        if not v.strip():
+            continue
+        clang = "clang" in v.lower() or "apple" in v.lower()
+        cand = (c, clang, 0 if clang else _gcc_major(c), v.splitlines()[0])
+        if os.environ.get("OA_CXX") and c == os.environ["OA_CXX"]:
+            return cand
+        rank = (not clang, cand[2])          # any GCC beats clang; newer GCC beats older
+        if best is None or rank > best[0]:
+            best = (rank, cand)
+    return best[1] if best else (None, False, 0, "")
 
-GPP, GPP_IS_CLANG, GPP_DESC = find_cxx()   # resolved once at import
-SHIM_DIR = None
-if GPP and GPP_IS_CLANG:
-    SHIM_DIR = os.path.join(tempfile.gettempdir(), "oamock_shim")
-    os.makedirs(os.path.join(SHIM_DIR, "bits"), exist_ok=True)
-    with open(os.path.join(SHIM_DIR, "bits", "stdc++.h"), "w") as f: f.write(SHIM_HEADERS)
 
-def cxx_args(src, exe):
+GPP, GPP_IS_CLANG, GPP_MAJOR, GPP_DESC = find_cxx()   # resolved once at import
+OLD_MINGW = bool(GPP) and IS_WIN and not GPP_IS_CLANG and 0 < GPP_MAJOR < 10
+SHIM_DIR = os.path.join(tempfile.gettempdir(), "oamock_shim")
+os.makedirs(os.path.join(SHIM_DIR, "bits"), exist_ok=True)
+with open(os.path.join(SHIM_DIR, "bits", "stdc++.h"), "w") as f:
+    f.write(SHIM_HEADERS)
+USE_SHIM = GPP_IS_CLANG or OLD_MINGW or os.environ.get("OA_FORCE_SHIM") == "1"
+
+
+def cxx_args(src, exe, shim=None):
     a = [GPP, "-std=c++17", "-O2"]
-    if SHIM_DIR: a += ["-I", SHIM_DIR]
-    if IS_MAC: a += ["-Wl,-stack_size,0x10000000"]   # 256 MB stack for deep recursion
+    if USE_SHIM if shim is None else shim:
+        a += ["-I", SHIM_DIR]
+    if IS_MAC:
+        a += ["-Wl,-stack_size,0x10000000"]   # 256 MB stack for deep recursion
+    elif IS_WIN and not GPP_IS_CLANG:
+        a += ["-Wl,--stack,268435456"]        # Windows default is 1 MB
     return a + ["-o", exe, src]
+
+
+def compile_cxx(src, exe):
+    """Compile; if the compiler's own <bits/stdc++.h> breaks (seen with MinGW GCC 8), retry with the shim."""
+    c = subprocess.run(cxx_args(src, exe), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90)
+    err = c.stderr.decode("utf-8", "replace")
+    if c.returncode != 0 and not USE_SHIM and re.search(r"fs_path\.h|bits[/\\]fs_|<filesystem>", err):
+        c = subprocess.run(cxx_args(src, exe, shim=True), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90)
+        err = c.stderr.decode("utf-8", "replace")
+    return c.returncode, err
+
+
 JAVAC, JAVA = which("javac"), which("java")
 PY = sys.executable
 
@@ -118,8 +137,8 @@ def judge(lang, code, inputs, limit_ms):
             if not GPP: return {"compile_error": "No C++ compiler found. On macOS run: xcode-select --install  (or: brew install gcc). On Windows install MinGW-w64 and add g++ to PATH. Then restart this runner."}
             src = os.path.join(d, "main.cpp"); exe = os.path.join(d, "main.exe" if IS_WIN else "main")
             open(src, "w", encoding="utf-8").write(code)
-            c = subprocess.run(cxx_args(src, exe), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90)
-            if c.returncode != 0: return {"compile_error": c.stderr.decode("utf-8", "replace")[-6000:]}
+            rc, err = compile_cxx(src, exe)
+            if rc != 0: return {"compile_error": err[-6000:]}
             args = [exe]
         elif lang == "java":
             if not (JAVAC and JAVA): return {"compile_error": "javac/java were not found. Install a JDK and restart this runner."}
@@ -141,7 +160,8 @@ def judge(lang, code, inputs, limit_ms):
 def describe():
     """One line per language, printed at start-up."""
     return [
-        ("C++", (GPP_DESC + ("  [bits/stdc++.h provided by the runner]" if SHIM_DIR else "")) if GPP else "NOT FOUND (macOS: xcode-select --install or brew install gcc; Windows: run setup.bat)"),
+        ("C++", (GPP_DESC + ("  [bits/stdc++.h provided by the runner]" if USE_SHIM else "")
+                + ("\n          old MinGW GCC %d: it works, but run setup.bat to install a current GCC" % GPP_MAJOR if OLD_MINGW else "")) if GPP else "NOT FOUND (macOS: xcode-select --install or brew install gcc; Windows: run setup.bat)"),
         ("Java", JAVAC or "NOT FOUND (install a JDK, or run the setup script)"),
         ("Python", PY),
     ]

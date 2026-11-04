@@ -51,9 +51,18 @@ Ok ((& $pyExe @pyArgs --version 2>&1) | Out-String).Trim()
 
 # ---------- C++ ----------
 Step "2/3 C++ compiler (g++ for C++17 answers)"
-if (-not (Have "g++")) {
-  Warn "g++ not found. Installing MinGW-w64 (WinLibs) with winget..."
+function Gcc-Major {
+  if (-not (Have "g++")) { return 0 }
+  try { $v = (& g++ -dumpversion 2>$null | Out-String).Trim(); return [int]($v.Split(".")[0]) } catch { return 0 }
+}
+$gccMajor = Gcc-Major
+if ($gccMajor -eq 0) {
+  Warn "g++ not found. Installing MinGW-w64 GCC (WinLibs) with winget..."
   Winget-Install "BrechtSanders.WinLibs.POSIX.UCRT" | Out-Null
+} elseif ($gccMajor -lt 10) {
+  Warn "Found an old g++ (GCC $gccMajor, often the 2018 MinGW 8.1 installer). Its C++17 headers are buggy. Installing a current GCC (WinLibs) alongside it..."
+  Winget-Install "BrechtSanders.WinLibs.POSIX.UCRT" | Out-Null
+  Ok "The mock picks the newest GCC automatically, even if the old one comes first on PATH."
 }
 if (Have "g++") { Ok ((& g++ --version | Select-Object -First 1) | Out-String).Trim() }
 else { Warn "No g++. Install MinGW-w64 (https://winlibs.com) and add its bin folder to PATH. Python and JavaScript answers still work." }
