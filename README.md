@@ -1,6 +1,6 @@
 # OA Mock
 
-**Practice online assessments for Flipkart, Juspay and Amazon on your own computer.** The tests use questions reported from real OAs, with hidden test cases, HackerRank-style partial marks and a scorecard at the end. You can sit a test timed or untimed.
+**Practice online assessments for Flipkart, Juspay, Amazon and MathWorks on your own computer.** The tests use questions reported from real OAs, with hidden test cases, HackerRank-style partial marks and a scorecard at the end. You can sit a test timed or untimed.
 
 ![Amazon OA Mock home](docs/home.png)
 
@@ -134,6 +134,20 @@ The *Return/Risk Evaluation* repo task is listed but can't be run, because only 
 ### Juspay
 
 20 coding questions from HackerEarth, Rookies World, the Unstop hiring challenge and live elimination rounds. Formats: **Converging Maze**, **HackerEarth graph set**, **Unstop challenge**, **Elimination round**, Custom.
+
+### MathWorks
+
+5 coding questions from the IIT Bombay OAs (HackerRank).
+
+| Role | Question | |
+|---|---|---|
+| Embedded Systems | Fewest IDs After Removals (Easy) | the real test also had 25 MCQs (embedded, OS, architecture, aptitude), not included |
+| Embedded Systems | Fewest Notes, Two Denominations (Medium) | |
+| Software Engineer | Fewest Subsequences With a Majority (Medium) | |
+| Software Engineer | Substrings That Rearrange Into Palindromes (Medium) | |
+| Software Engineer | Fill the Dots for the Most Uniform Substrings (Hard) | |
+
+Formats: **Software Engineer** (3 questions, 90 min; the real test required at least two languages), **Embedded Systems** (the 2 coding questions, 40 min), Custom. Notes: `sources/mathworks/`.
 
 ---
 
