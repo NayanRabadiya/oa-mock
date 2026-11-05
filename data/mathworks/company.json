@@ -1,0 +1,54 @@
+{
+  "key": "mw",
+  "name": "MathWorks OA Mock",
+  "tagline": "Embedded Systems · Software Engineer · IIT Bombay",
+  "headline": "Sit a timed MathWorks OA, then see what passed.",
+  "blurb": "coding questions reported from MathWorks OAs at IIT Bombay (Embedded Systems and Software Engineer roles, HackerRank)",
+  "defaultFmt": "swe",
+  "custom": [
+    "minids",
+    "palsubs",
+    "beauty"
+  ],
+  "formats": {
+    "swe": {
+      "name": "Software Engineer",
+      "desc": "3 coding questions · 90 min · the real test required at least two languages across the three",
+      "mins": 90,
+      "pools": [
+        ["majparts"],
+        ["palsubs"],
+        ["beauty"]
+      ]
+    },
+    "emb": {
+      "name": "Embedded Systems",
+      "desc": "The 2 coding questions · 40 min (the real 90-min test also had 25 MCQs, not included)",
+      "mins": 40,
+      "pools": [
+        ["minids"],
+        ["twodenom"]
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 60,
+      "pools": []
+    }
+  },
+  "offlist": [
+    {
+      "t": "25 MCQs: embedded systems, OS, computer architecture, aptitude",
+      "s": "MathWorks Embedded Systems OA (IIT Bombay)",
+      "why": "Only the topics and level (easy to medium) were reported, not the questions."
+    }
+  ],
+  "order": [
+    "minids",
+    "twodenom",
+    "majparts",
+    "palsubs",
+    "beauty"
+  ]
+}
