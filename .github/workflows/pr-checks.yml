@@ -23,6 +23,20 @@ jobs:
         run: python3 tools/check_contrast.py
       - name: App starts and grades
         run: python3 tools/smoke.py
+      - name: Environments for repository questions (when they or the runner changed)
+        run: |
+          if git diff --name-only "origin/${{ github.base_ref || 'main' }}" -- data/*/repos app/envs app/server/repos.py app/server/envs.py | grep -q .; then
+            python3 tools/setup_env.py django
+          else
+            echo "no repository question or runner changes"
+          fi
+      - name: Repository questions still pass (when the runner changed)
+        run: |
+          if git diff --name-only "origin/${{ github.base_ref || 'main' }}" -- app/envs app/server/repos.py app/server/envs.py | grep -q .; then
+            python3 tools/add_question.py --check $(grep -l '"type": "repo"' data/*/questions/*.json)
+          else
+            echo "runner unchanged"
+          fi
       - name: Changed questions (format, references, 4 language drivers, known-wrong solutions, duplicates)
         run: python3 tools/add_question.py --changed "origin/${{ github.base_ref || 'main' }}"
       - name: data/catalog.json is up to date

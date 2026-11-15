@@ -152,7 +152,7 @@ function editorKeys(){
   const k = {   // checked before the key style (Sublime/Vim), so Run/Submit always win
     Tab: tabKey, "Shift-Tab": c => c.execCommand("indentLess"), Backspace: backspaceKey, "'}'": closeBraceKey,
     "Ctrl-Space": c => c.showHint({hint:oaHint, completeSingle:false}),
-    "Ctrl-Enter": () => doRun(false), "Cmd-Enter": () => doRun(false), "Shift-Ctrl-Enter": () => doRun(true), "Shift-Cmd-Enter": () => doRun(true),
+    "Ctrl-S": () => saveNow(), "Cmd-S": () => saveNow(), "Ctrl-Enter": () => doRun(false), "Cmd-Enter": () => doRun(false), "Shift-Ctrl-Enter": () => doRun(true), "Shift-Cmd-Enter": () => doRun(true),
     "Ctrl-S": () => { saveCode(); toast("Saved"); }, "Cmd-S": () => { saveCode(); toast("Saved"); },
     "Shift-Ctrl-I": reindentAll, "Shift-Cmd-I": reindentAll,
     "Ctrl-/": c => c.toggleComment({indent:true}), "Cmd-/": c => c.toggleComment({indent:true}),

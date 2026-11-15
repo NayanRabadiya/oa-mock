@@ -13,7 +13,7 @@ function buildSet(fmt){
 }
 function startExam(fmt, ids, mins, practice, untimed, cur){
   const lang = {}, code = {};
-  ids.forEach(id => { const t = QMAP[id].type; lang[id] = t === "sql" ? "sql" : t === "debug" ? "js" : t === "sjt" ? "sjt" : S.lang; code[id] = {}; });
+  ids.forEach(id => { const t = QMAP[id].type; lang[id] = t === "sql" ? "sql" : t === "debug" ? "js" : t === "sjt" ? "sjt" : t === "repo" ? repoDefault(QMAP[id], practice) : S.lang; code[id] = {}; });
   untimed = !practice && !!untimed;
   S.exam = {fmt, ids, cur:0, start:Date.now(), dur:untimed ? 0 : mins*60000, untimed, practice:!!practice, lang, code, ans:{}, best:{}, switches:0, ended:false};
   S.exam.cur = Math.max(0, Math.min(ids.length - 1, cur || 0));
@@ -47,6 +47,7 @@ function codeOf(id, lang){
 function saveCode(){
   if (!S.exam || S.view !== "exam") return;
   const id = S.exam.ids[S.exam.cur], lang = S.exam.lang[id];
+  if (QMAP[id].type === "repo") return void repoFlush();      // files are saved in the repository on disk
   const v = cm ? cm.getValue() : ta ? ta.value : null;
   if (v != null){ S.exam.code[id] = S.exam.code[id] || {}; S.exam.code[id][bufKey(QMAP[id], lang)] = v; saveExam(); }
 }

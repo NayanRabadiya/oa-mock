@@ -10,7 +10,7 @@ const norm = s => String(s).replace(/\r/g,"").split("\n").map(l => l.replace(/\s
 const fmtTime = ms => { ms = Math.max(0, ms); const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60; return (h ? h+":" : "") + String(m).padStart(2,"0") + ":" + String(x).padStart(2,"0"); };
 const pick = a => a[Math.floor(Math.random()*a.length)];
 const byDiff = d => QS.filter(q => q.diff === d);
-const ORDER = {Easy:0, Medium:1, Hard:2, SQL:3, Debug:4, SJT:5};
+const ORDER = {Easy:0, Medium:1, Hard:2, SQL:3, Debug:4, Repo:5, SJT:6};
 // Bank order: newest year first (questions without a year last), then difficulty, then title.
 const bankSort = (a, b) => (b.year || 0) - (a.year || 0) || (b.month || 0) - (a.month || 0) || ORDER[a.diff] - ORDER[b.diff] || a.title.localeCompare(b.title);
 const bankIds = () => [...QS].sort(bankSort).map(q => q.id);

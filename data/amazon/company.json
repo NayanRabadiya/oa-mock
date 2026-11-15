@@ -14,6 +14,7 @@
     "winners",
     "qmarks",
     "watchlist",
+    "watchlist-repo",
     "sjt"
   ],
   "formats": {
@@ -68,6 +69,16 @@
         ]
       ]
     },
+    "repo": {
+      "name": "Repository task",
+      "desc": "MovieDB watchlist as a real project: pick your environment, then fix the backend until the tests pass · 60 min",
+      "mins": 60,
+      "pools": [
+        [
+          "watchlist-repo"
+        ]
+      ]
+    },
     "debug": {
       "name": "Debugging section",
       "desc": "MovieDB watchlist repo: fix the backend until the integration tests pass · 60 min",
@@ -102,6 +113,7 @@
     "winners",
     "qmarks",
     "watchlist",
+    "watchlist-repo",
     "sjt"
   ]
 }
