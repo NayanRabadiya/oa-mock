@@ -1,0 +1,22 @@
+{
+ "id": "library-loans",
+ "type": "repo",
+ "title": "Library Loans (repository warm-up)",
+ "diff": "Repo",
+ "src": "Written for this mock · repository warm-up",
+ "body": "<p>You are given the repository of a small <b>library loans API</b>: it lists the books, lends them to members and takes them back, charging a fee when a book comes back late.</p>\n<p><b>Issue:</b> the librarians report that members can take out more books than the rules allow, and that books returned on time are being charged a late fee. <b>2 integrated test cases</b> fail.</p>\n<p>Run the tests, read the failures, find the component each one points to, fix it, and run the tests again until they pass. The lending rules are in <code>README.md</code>.</p>\n<p><b>Note:</b> the acceptance criteria are the predefined tests; more tests run when you submit.</p>\n<p class=\"muted\">Written for this mock as a warm-up for the repository tasks (it isn't from a company OA). The code is small on purpose: about ten files and two bugs, so the whole loop of a repository question takes 15 to 30 minutes.</p>",
+ "stacks": [
+  "node",
+  "django",
+  "spring"
+ ],
+ "year": 2026,
+ "inp": "",
+ "out": "",
+ "cons": [],
+ "samples": [],
+ "hidden": [],
+ "ref": "",
+ "lc": null,
+ "lcurl": null
+}

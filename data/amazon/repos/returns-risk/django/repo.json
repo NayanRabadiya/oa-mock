@@ -1,0 +1,159 @@
+{
+ "stack": "django",
+ "name": "Return / Risk Evaluation Service (Django)",
+ "readonly": [
+  "README.md",
+  "requirements.txt",
+  "manage.py",
+  "returns/tests/*"
+ ],
+ "open": [
+  "returns/services/eligibility.py"
+ ],
+ "tests": [
+  {
+   "id": "returns.tests.test_returns.ReturnEvaluationTests.test_accepts_a_return_on_the_last_day_of_the_window",
+   "title": "A return on the last day of the window is accepted",
+   "hidden": false
+  },
+  {
+   "id": "returns.tests.test_returns.ReturnEvaluationTests.test_matches_categories_whatever_their_case",
+   "title": "Categories match whatever their case",
+   "hidden": false
+  },
+  {
+   "id": "returns.tests.test_returns.ReturnEvaluationTests.test_counts_returns_across_every_linked_account",
+   "title": "History counts every account in the linked group",
+   "hidden": false
+  },
+  {
+   "id": "returns.tests.test_returns.ReturnEvaluationTests.test_only_approved_returns_count_toward_the_history",
+   "title": "Only approved returns count toward the history",
+   "hidden": false
+  },
+  {
+   "id": "returns.tests.test_returns.ReturnEvaluationTests.test_scores_the_value_of_the_return_as_price_times_quantity",
+   "title": "The value is price x quantity",
+   "hidden": false
+  },
+  {
+   "id": "returns.tests.test_returns.ReturnEvaluationTests.test_decides_at_the_score_thresholds",
+   "title": "Decisions at the score thresholds (30 and 70)",
+   "hidden": false
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_validates_the_request",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_rejects_orders_that_have_not_been_delivered",
+   "title": "Orders not yet delivered are rejected",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_an_item_can_have_only_one_open_return",
+   "title": "An item can have only one open return",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_caps_the_score_at_100",
+   "title": "The score is capped at 100",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_history_covers_the_90_days_before_the_request",
+   "title": "History covers the 90 days before the request",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_the_refund_total_must_be_more_than_1000",
+   "title": "The refund total must be more than 1000",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_every_reason_comes_with_its_message",
+   "title": "Every reason comes with its message",
+   "hidden": true
+  },
+  {
+   "id": "returns.tests.test_more.MoreReturnEvaluationTests.test_evaluations_are_recorded_in_the_history",
+   "title": "Evaluations are recorded in the history",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "returns/policy.py",
+   "test": "test_matches_categories_whatever_their_case",
+   "why": "get_policy looks the category up as written on the order (\"Electronics\"), but the policy keys are lowercase, so every category looks unknown and nothing can be returned",
+   "fix": "Normalise the category before the lookup: trim and lowercase it.",
+   "edits": [
+    {
+     "fixed": "    key = str(category or \"\").strip().lower()",
+     "buggy": "    key = str(category or \"\").strip()"
+    }
+   ]
+  },
+  {
+   "file": "returns/services/decisions.py",
+   "test": "test_decides_at_the_score_thresholds",
+   "why": "a score of exactly 70 goes to manual review instead of being rejected (> instead of >=)",
+   "fix": "Reject when score >= REJECT_FROM (70).",
+   "edits": [
+    {
+     "fixed": "    if score >= REJECT_FROM:",
+     "buggy": "    if score > REJECT_FROM:"
+    }
+   ]
+  },
+  {
+   "file": "returns/services/eligibility.py",
+   "test": "test_accepts_a_return_on_the_last_day_of_the_window",
+   "why": "the return-window check rejects a request made on the last day of the window (>= instead of >)",
+   "fix": "Only reject when days_since_delivery > policy[\"window_days\"]; day 30 of a 30-day window is still inside it.",
+   "edits": [
+    {
+     "fixed": "    if days_since_delivery > policy[\"window_days\"]:",
+     "buggy": "    if days_since_delivery >= policy[\"window_days\"]:"
+    }
+   ]
+  },
+  {
+   "file": "returns/services/history.py",
+   "test": "test_only_approved_returns_count_toward_the_history",
+   "why": "recent_refunds counts every past return, including rejected and pending ones, not just approved (refunded) ones",
+   "fix": "Keep only returns with status APPROVED.",
+   "edits": [
+    {
+     "fixed": "            if ret[\"status\"] == \"APPROVED\" and 0 <= age <= HISTORY_DAYS:",
+     "buggy": "            if 0 <= age <= HISTORY_DAYS:"
+    }
+   ]
+  },
+  {
+   "file": "returns/services/linked_accounts.py",
+   "test": "test_counts_returns_across_every_linked_account",
+   "why": "get_account_group only follows the customer's direct links, so accounts linked through another account (A - B - C) are missed",
+   "fix": "Walk the links until no new account turns up (a breadth-first search over linkedAccountIds).",
+   "edits": [
+    {
+     "fixed": "    group = [customer_id]\n    seen = set(group)\n\n    i = 0\n    while i < len(group):\n        customer = store.get_customer(group[i])\n        for linked_id in (customer or {}).get(\"linkedAccountIds\", []):\n            if linked_id not in seen:\n                seen.add(linked_id)\n                group.append(linked_id)\n        i += 1\n\n    return group",
+     "buggy": "    customer = store.get_customer(customer_id)\n    linked = (customer or {}).get(\"linkedAccountIds\", [])\n\n    return [customer_id] + [i for i in linked if i != customer_id]"
+    }
+   ]
+  },
+  {
+   "file": "returns/services/risk_scoring.py",
+   "test": "test_scores_the_value_of_the_return_as_price_times_quantity",
+   "why": "the value of the return ignores the quantity (price only)",
+   "fix": "value = price x quantity.",
+   "edits": [
+    {
+     "fixed": "    value = float(item[\"price\"]) * int(item.get(\"quantity\") or 1)",
+     "buggy": "    value = float(item[\"price\"])"
+    }
+   ]
+  }
+ ]
+}

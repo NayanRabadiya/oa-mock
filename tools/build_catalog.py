@@ -34,7 +34,7 @@ def entry(key):
         "key": key, "name": c.get("name", key), "tagline": c.get("tagline", ""),
         "questions": len(qs), "years": vals("year"), "roles": vals("role"), "colleges": vals("college"),
         "formats": [f["name"] for k, f in c.get("formats", {}).items() if k != "custom"],
-        "bytes": size, "download": packed, **_logo(d, c),
+        "bytes": size, "download": packed, **({"own": True} if c.get("own") else {}), **_logo(d, c),
     }
 
 

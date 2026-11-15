@@ -6,23 +6,24 @@ function homeHTML(){
   const fm = Object.entries(FORMATS).map(([k, f]) => `<label class="fmt"><input type="radio" name="fmt" id="fmt-${k}" value="${k}" ${S.fmt === k ? "checked" : ""}><b>${f.name}</b><span>${f.desc}</span></label>`).join("");
   const custom = S.fmt === "custom" ? `<div class="custom-pick">${QS.map(q => `<label><input type="checkbox" id="cp-${q.id}" value="${q.id}" ${S.custom.includes(q.id) ? "checked" : ""}> ${esc(q.title)} <span class="pill d-${q.diff}">${q.diff}</span></label>`).join("")}</div>` : "";
   const bank = bankHTML(best);
+  const coding = QS.some(q => !q.type || q.type === "coding");   // a bank of repository tasks has no language or I/O to pick
   const hrows = hist.map(h => `<tr><td>${new Date(h.at).toLocaleString([], {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"})}</td><td>${esc(FORMATS[h.fmt] ? FORMATS[h.fmt].name : h.fmt)}</td><td>${h.per.map(p => esc(QMAP[p.id] ? QMAP[p.id].title : p.id) + " " + p.s).join(" · ")}</td><td class="n">${h.score}/${h.max}</td><td class="n">${fmtTime(h.used)}${h.untimed ? ` <span class="muted">untimed</span>` : ""}</td></tr>`).join("");
   return `
   <header class="bar"><div class="brand">${esc(CFG.name)}<small>${LOCAL ? "Runs on this computer" : "Practice test room"}</small></div><div class="spacer"></div>${LOCAL ? `<a class="btn" href="/">All companies</a>` : ""}${THEME_BTN}</header>
   <main class="wrap">
     ${S.exam && !S.exam.ended ? resumeHTML() : ""}
     <section class="hero"><h1>${esc(CFG.headline)}</h1>
-      <p>${QS.length} ${esc(CFG.blurb)}, each with its own hidden tests. No camera, no microphone, no proctoring. ${LOCAL ? "You are on the local runner: C++17, Java and Python compile and run on your own computer." : "Python and JavaScript run in your browser, and the SQL question runs against an in-browser database. For C++ or Java, open the test through the local runner file."}</p></section>
+      <p>${QS.length === 1 ? "One" : QS.length} ${esc(QS.length === 1 ? CFG.blurb.replace(/^questions\b/, "question") : CFG.blurb)}, each with its own hidden tests. No camera, no microphone, no proctoring. ${!coding ? "Each repository runs in an environment you set up once on this computer (Node.js, Django or Spring Boot)." : LOCAL ? "You are on the local runner: C++17, Java and Python compile and run on your own computer." : "Python and JavaScript run in your browser, and the SQL question runs against an in-browser database. For C++ or Java, open the test through the local runner file."}</p></section>
     <section class="panel" aria-labelledby="h-start"><h2 id="h-start">Start a test</h2>
       <div class="formats">${fm}</div>${custom}
       <div class="setup-row">
         <label class="field" for="mins">Minutes<input id="mins" type="number" min="5" max="240" value="${S.fmt === "custom" ? S.customMins : FORMATS[S.fmt].mins}" style="width:90px" ${S.untimed ? "disabled" : ""}></label>
         <label class="field chk" for="untimed">Timer<span class="box"><input type="checkbox" id="untimed" ${S.untimed ? "checked" : ""}> No timer</span></label>
-        <label class="field" for="style0" title="LeetCode: write a function, a hidden driver does the input/output. HackerRank: the whole program is in the editor.">Problem style<select id="style0"><option value="leetcode" ${STYLE === "leetcode" ? "selected" : ""}>LeetCode</option><option value="hackerrank" ${STYLE === "hackerrank" ? "selected" : ""}>HackerRank</option></select></label>
-        <label class="field" for="lang0">Language<select id="lang0">${CODE_LANGS.map(l => `<option value="${l}" ${S.lang === l ? "selected" : ""}>${LANGS[l].label}${langMissing(l) ? " (not installed)" : ""}</option>`).join("")}</select></label>
+        ${coding ? `<label class="field" for="style0" title="LeetCode: write a function, a hidden driver does the input/output. HackerRank: the whole program is in the editor.">Problem style<select id="style0"><option value="leetcode" ${STYLE === "leetcode" ? "selected" : ""}>LeetCode</option><option value="hackerrank" ${STYLE === "hackerrank" ? "selected" : ""}>HackerRank</option></select></label>
+        <label class="field" for="lang0">Language<select id="lang0">${CODE_LANGS.map(l => `<option value="${l}" ${S.lang === l ? "selected" : ""}>${LANGS[l].label}${langMissing(l) ? " (not installed)" : ""}</option>`).join("")}</select></label>` : ""}
         <button class="btn primary" id="go">Start test</button>
       </div>
-      <ul class="rules"><li>Run checks the sample cases. Submit runs all hidden tests and keeps your best score for each question.</li><li>Partial marks: score = tests passed / total × 100, like HackerRank.</li><li>The test ends when the timer runs out. Tick <b>No timer</b> to work without a limit: the clock counts up instead and you end the test yourself. Leaving the tab is counted and shown in the report.</li><li>${esc(CFG.ioRule || "Read input from STDIN and print to STDOUT. Do not print extra text.")}</li></ul>
+      <ul class="rules"><li>Run checks the sample cases. Submit runs all hidden tests and keeps your best score for each question.</li><li>Partial marks: score = tests passed / total × 100, like HackerRank.</li><li>The test ends when the timer runs out. Tick <b>No timer</b> to work without a limit: the clock counts up instead and you end the test yourself. Leaving the tab is counted and shown in the report.</li>${coding ? `<li>${esc(CFG.ioRule || "Read input from STDIN and print to STDOUT. Do not print extra text.")}</li>` : `<li>Repository tasks: pick an environment, fix the code until the tests pass, then submit to run the hidden tests too.</li>`}</ul>
     </section>
     <section class="panel" aria-labelledby="h-bank"><div class="bank-head"><h2 id="h-bank">Question bank</h2>${bankFiltersHTML()}</div><div class="bank" id="bank">${bank}</div></section>
     ${homeSubsHTML()}
@@ -67,7 +68,7 @@ function bankHTML(best){
   return html + (off ? `<h3 class="bank-year">Reported but not runnable</h3>${off}` : "");
 }
 function bindHome(){
-  $("#style0").addEventListener("change", ev => setStyle(ev.target.value));
+  if ($("#style0")) $("#style0").addEventListener("change", ev => setStyle(ev.target.value));
   document.querySelectorAll("[data-bf]").forEach(s => s.addEventListener("change", () => { BF[s.dataset.bf] = s.value; store.set(K + "-bank-filter", BF); render(); }));
   fillHomeSubs();
   if (S.exam && !S.exam.ended){
@@ -77,7 +78,7 @@ function bindHome(){
   }
   document.querySelectorAll('input[name="fmt"]').forEach(r => r.addEventListener("change", () => { S.fmt = r.value; render(); }));
   document.querySelectorAll(".custom-pick input").forEach(c => c.addEventListener("change", () => { S.custom = [...document.querySelectorAll(".custom-pick input:checked")].map(x => x.value); }));
-  $("#lang0").addEventListener("change", e => { S.lang = e.target.value; store.set(K + "-lang", S.lang); });
+  if ($("#lang0")) $("#lang0").addEventListener("change", e => { S.lang = e.target.value; store.set(K + "-lang", S.lang); });
   $("#mins").addEventListener("change", e => { if (S.fmt === "custom") S.customMins = +e.target.value || 60; });
   $("#untimed").addEventListener("change", e => { S.untimed = e.target.checked; store.set(K + "-untimed", S.untimed); $("#mins").disabled = S.untimed; });
   $("#go").addEventListener("click", () => {

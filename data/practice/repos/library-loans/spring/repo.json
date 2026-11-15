@@ -1,0 +1,75 @@
+{
+ "stack": "spring",
+ "name": "Library Loans API (Spring Boot)",
+ "readonly": [
+  "README.md",
+  "pom.xml",
+  "src/test/*"
+ ],
+ "open": [
+  "src/main/java/com/library/service/LoanService.java"
+ ],
+ "tests": [
+  {
+   "id": "com.library.LoanTests.borrowingAndReturningABookChangesTheCopiesOnTheShelf",
+   "title": "Borrowing and returning change the copies on the shelf",
+   "hidden": false
+  },
+  {
+   "id": "com.library.LoanTests.aMemberCanHaveAtMost3BooksOut",
+   "title": "A member can have at most 3 books out",
+   "hidden": false
+  },
+  {
+   "id": "com.library.LoanTests.lateFeesStartAfterThe14DayLoanPeriod",
+   "title": "Late fees start after the 14-day loan period",
+   "hidden": false
+  },
+  {
+   "id": "com.library.LoanTests.aLoanCanBeReturnedOnlyOnce",
+   "title": "A loan can be returned only once",
+   "hidden": false
+  },
+  {
+   "id": "com.library.MoreLoanTests.validatesTheRequest",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "com.library.MoreLoanTests.aBookWithEveryCopyOutCannotBeBorrowed",
+   "title": "A book with every copy out can't be borrowed",
+   "hidden": true
+  },
+  {
+   "id": "com.library.MoreLoanTests.theFeeForOneLoanIsAtMost200",
+   "title": "The fee for one loan is at most 200",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "src/main/java/com/library/service/FeeService.java",
+   "test": "lateFeesStartAfterThe14DayLoanPeriod",
+   "why": "daysLate counts every day since the book was borrowed, so even an on-time return is charged; the 14-day loan period is never taken off",
+   "fix": "daysLate = max(0, days since borrowed - LOAN_DAYS).",
+   "edits": [
+    {
+     "fixed": "        long daysLate = Math.max(0, Dates.daysBetween(borrowedAt, returnedAt) - LoanRules.LOAN_DAYS);",
+     "buggy": "        long daysLate = Math.max(0, Dates.daysBetween(borrowedAt, returnedAt));"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/library/service/LoanService.java",
+   "test": "aMemberCanHaveAtMost3BooksOut",
+   "why": "the loan-limit check lets a member take a 4th book (> instead of >=)",
+   "fix": "Refuse when the member already has MAX_OPEN_LOANS (3) open loans: open.size() >= LoanRules.MAX_OPEN_LOANS.",
+   "edits": [
+    {
+     "fixed": "        if (open.size() >= LoanRules.MAX_OPEN_LOANS) {",
+     "buggy": "        if (open.size() > LoanRules.MAX_OPEN_LOANS) {"
+    }
+   ]
+  }
+ ]
+}

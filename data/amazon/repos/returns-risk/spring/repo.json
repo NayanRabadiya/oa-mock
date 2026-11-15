@@ -1,0 +1,158 @@
+{
+ "stack": "spring",
+ "name": "Return / Risk Evaluation Service (Spring Boot)",
+ "readonly": [
+  "README.md",
+  "pom.xml",
+  "src/test/*"
+ ],
+ "open": [
+  "src/main/java/com/returns/service/EligibilityService.java"
+ ],
+ "tests": [
+  {
+   "id": "com.returns.ReturnEvaluationTests.acceptsAReturnOnTheLastDayOfTheWindow",
+   "title": "A return on the last day of the window is accepted",
+   "hidden": false
+  },
+  {
+   "id": "com.returns.ReturnEvaluationTests.matchesCategoriesWhateverTheirCase",
+   "title": "Categories match whatever their case",
+   "hidden": false
+  },
+  {
+   "id": "com.returns.ReturnEvaluationTests.countsReturnsAcrossEveryLinkedAccount",
+   "title": "History counts every account in the linked group",
+   "hidden": false
+  },
+  {
+   "id": "com.returns.ReturnEvaluationTests.onlyApprovedReturnsCountTowardTheHistory",
+   "title": "Only approved returns count toward the history",
+   "hidden": false
+  },
+  {
+   "id": "com.returns.ReturnEvaluationTests.scoresTheValueOfTheReturnAsPriceTimesQuantity",
+   "title": "The value is price x quantity",
+   "hidden": false
+  },
+  {
+   "id": "com.returns.ReturnEvaluationTests.decidesAtTheScoreThresholds",
+   "title": "Decisions at the score thresholds (30 and 70)",
+   "hidden": false
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.validatesTheRequest",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.rejectsOrdersThatHaveNotBeenDelivered",
+   "title": "Orders not yet delivered are rejected",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.anItemCanHaveOnlyOneOpenReturn",
+   "title": "An item can have only one open return",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.capsTheScoreAt100",
+   "title": "The score is capped at 100",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.historyCoversThe90DaysBeforeTheRequest",
+   "title": "History covers the 90 days before the request",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.theRefundTotalMustBeMoreThan1000",
+   "title": "The refund total must be more than 1000",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.everyReasonComesWithItsMessage",
+   "title": "Every reason comes with its message",
+   "hidden": true
+  },
+  {
+   "id": "com.returns.MoreReturnEvaluationTests.evaluationsAreRecordedInTheHistory",
+   "title": "Evaluations are recorded in the history",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "src/main/java/com/returns/config/ReturnPolicy.java",
+   "test": "matchesCategoriesWhateverTheirCase",
+   "why": "getPolicy looks the category up as written on the order (\"Electronics\"), but the policy keys are lowercase, so every category looks unknown and nothing can be returned",
+   "fix": "Normalise the category before the lookup: trim and lowercase it.",
+   "edits": [
+    {
+     "fixed": "        String key = category == null ? \"\" : category.trim().toLowerCase();",
+     "buggy": "        String key = category == null ? \"\" : category.trim();"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/returns/service/DecisionService.java",
+   "test": "decidesAtTheScoreThresholds",
+   "why": "a score of exactly 70 goes to manual review instead of being rejected (> instead of >=)",
+   "fix": "Reject when score >= REJECT_FROM (70).",
+   "edits": [
+    {
+     "fixed": "        if (score >= RiskRules.REJECT_FROM) {",
+     "buggy": "        if (score > RiskRules.REJECT_FROM) {"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/returns/service/EligibilityService.java",
+   "test": "acceptsAReturnOnTheLastDayOfTheWindow",
+   "why": "the return-window check rejects a request made on the last day of the window (>= instead of >)",
+   "fix": "Only reject when daysSinceDelivery > policy.windowDays(); day 30 of a 30-day window is still inside it.",
+   "edits": [
+    {
+     "fixed": "        if (daysSinceDelivery > policy.windowDays()) {",
+     "buggy": "        if (daysSinceDelivery >= policy.windowDays()) {"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/returns/service/LinkedAccountService.java",
+   "test": "countsReturnsAcrossEveryLinkedAccount",
+   "why": "getAccountGroup only follows the customer's direct links, so accounts linked through another account (A - B - C) are missed",
+   "fix": "Walk the links until no new account turns up (a breadth-first search over linkedAccountIds()).",
+   "edits": [
+    {
+     "fixed": "        List<String> group = new ArrayList<>(List.of(customerId));\n        Set<String> seen = new HashSet<>(group);\n\n        for (int i = 0; i < group.size(); i++) {\n            Customer customer = store.getCustomer(group.get(i));\n            if (customer == null) {\n                continue;\n            }\n            for (String linkedId : customer.linkedAccountIds()) {\n                if (seen.add(linkedId)) {\n                    group.add(linkedId);\n                }\n            }\n        }\n\n        return group;",
+     "buggy": "        Customer customer = store.getCustomer(customerId);\n        List<String> group = new ArrayList<>(List.of(customerId));\n        if (customer != null) {\n            customer.linkedAccountIds().stream().filter(id -> !id.equals(customerId)).forEach(group::add);\n        }\n\n        return group;"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/returns/service/ReturnHistoryService.java",
+   "test": "onlyApprovedReturnsCountTowardTheHistory",
+   "why": "recentRefunds counts every past return, including rejected and pending ones, not just approved (refunded) ones",
+   "fix": "Keep only returns with status APPROVED.",
+   "edits": [
+    {
+     "fixed": "                if (\"APPROVED\".equals(ret.status()) && age >= 0 && age <= RiskRules.HISTORY_DAYS) {",
+     "buggy": "                if (age >= 0 && age <= RiskRules.HISTORY_DAYS) {"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/returns/service/RiskScoringService.java",
+   "test": "scoresTheValueOfTheReturnAsPriceTimesQuantity",
+   "why": "the value of the return ignores the quantity (price only)",
+   "fix": "value = price x quantity.",
+   "edits": [
+    {
+     "fixed": "        double value = item.price() * item.quantityOrOne();",
+     "buggy": "        double value = item.price();"
+    }
+   ]
+  }
+ ]
+}

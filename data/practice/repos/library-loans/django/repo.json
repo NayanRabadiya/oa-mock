@@ -1,0 +1,76 @@
+{
+ "stack": "django",
+ "name": "Library Loans API (Django)",
+ "readonly": [
+  "README.md",
+  "requirements.txt",
+  "manage.py",
+  "library/tests/*"
+ ],
+ "open": [
+  "library/services/loans.py"
+ ],
+ "tests": [
+  {
+   "id": "library.tests.test_loans.LoanTests.test_borrowing_and_returning_a_book_changes_the_copies_on_the_shelf",
+   "title": "Borrowing and returning change the copies on the shelf",
+   "hidden": false
+  },
+  {
+   "id": "library.tests.test_loans.LoanTests.test_a_member_can_have_at_most_3_books_out",
+   "title": "A member can have at most 3 books out",
+   "hidden": false
+  },
+  {
+   "id": "library.tests.test_loans.LoanTests.test_late_fees_start_after_the_14_day_loan_period",
+   "title": "Late fees start after the 14-day loan period",
+   "hidden": false
+  },
+  {
+   "id": "library.tests.test_loans.LoanTests.test_a_loan_can_be_returned_only_once",
+   "title": "A loan can be returned only once",
+   "hidden": false
+  },
+  {
+   "id": "library.tests.test_more.MoreLoanTests.test_validates_the_request",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "library.tests.test_more.MoreLoanTests.test_a_book_with_every_copy_out_cannot_be_borrowed",
+   "title": "A book with every copy out can't be borrowed",
+   "hidden": true
+  },
+  {
+   "id": "library.tests.test_more.MoreLoanTests.test_the_fee_for_one_loan_is_at_most_200",
+   "title": "The fee for one loan is at most 200",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "library/services/fees.py",
+   "test": "test_late_fees_start_after_the_14_day_loan_period",
+   "why": "days_late counts every day since the book was borrowed, so even an on-time return is charged; the 14-day loan period is never taken off",
+   "fix": "days_late = max(0, days since borrowed - LOAN_DAYS).",
+   "edits": [
+    {
+     "fixed": "    days_late = max(0, days_between(borrowed_at, returned_at) - LOAN_DAYS)",
+     "buggy": "    days_late = max(0, days_between(borrowed_at, returned_at))"
+    }
+   ]
+  },
+  {
+   "file": "library/services/loans.py",
+   "test": "test_a_member_can_have_at_most_3_books_out",
+   "why": "the loan-limit check lets a member take a 4th book (> instead of >=)",
+   "fix": "Refuse when the member already has MAX_OPEN_LOANS (3) open loans: len(open_loans) >= MAX_OPEN_LOANS.",
+   "edits": [
+    {
+     "fixed": "    if len(open_loans) >= MAX_OPEN_LOANS:",
+     "buggy": "    if len(open_loans) > MAX_OPEN_LOANS:"
+    }
+   ]
+  }
+ ]
+}

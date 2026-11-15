@@ -5,7 +5,7 @@ const QS = window.OA_DATA.questions;
 const QMAP = Object.fromEntries(QS.map(q => [q.id, q]));
 const CFG = window.OA_DATA.config;
 const K = CFG.key;
-const OFFLIST = CFG.offlist;
+const OFFLIST = CFG.offlist || [];
 const FORMATS = CFG.formats;
 const LOCAL = !!window.LOCAL_JUDGE;   // set by the server; C++, Java and Python run there
 const LANGS = {py:{label:"Python 3", mode:"python"}, cpp:{label:"C++17", mode:"text/x-c++src"}, java:{label:"Java", mode:"text/x-java"}, js:{label:"JavaScript (Node)", mode:"javascript"}, sql:{label:"SQL", mode:"text/x-sql"}};

@@ -39,25 +39,31 @@ watchlist_repo = {
     "inp": "", "out": "", "cons": [], "samples": [], "hidden": [], "ref": "", "lc": None, "lcurl": None,
 }
 
-QS = coding + [watchlist_repo, sjt]
+returns_risk = {
+    "id": "returns-risk", "type": "repo", "title": "Return / Risk Evaluation (repository)", "diff": "Repo",
+    "src": "Amazon SDE-1 Intern OA 2026 · section 2 (repository reconstructed for this mock)",
+    "body": open(H('returns_risk.html')).read().strip(),
+    "stacks": ["node", "django", "spring"], "year": 2026, "role": "SDE Intern",
+    "inp": "", "out": "", "cons": [], "samples": [], "hidden": [], "ref": "", "lc": None, "lcurl": None,
+}
+
+QS = coding + [watchlist_repo, returns_risk, sjt]
+REPOS = ["watchlist-repo", "returns-risk"]
 CFG = {
     "key": "amz", "name": "Amazon OA Mock",
     "tagline": "SDE Intern 2026: coding · repo debugging · situational judgement",
     "headline": "Sit a timed Amazon OA, then see what passed.",
     "blurb": "questions reported from Amazon's 2026 SDE intern OAs: coding, a repo-debugging task and situational judgement",
     "defaultFmt": "sde",
-    "ioRule": "Coding questions are LeetCode-style: complete the given function and return the answer. Input and output are handled for you, so don't print anything yourself: extra output counts as a wrong answer.", "custom": ["flip", "findpairs", "parcels", "outlier", "winners", "qmarks", "watchlist-repo", "sjt"],
+    "ioRule": "Coding questions are LeetCode-style: complete the given function and return the answer. Input and output are handled for you, so don't print anything yourself: extra output counts as a wrong answer.", "custom": ["flip", "findpairs", "parcels", "outlier", "winners", "qmarks", "watchlist-repo", "returns-risk", "sjt"],
     "formats": {
         "sde": {"name": "SDE Intern OA 2026", "desc": "3 sections: coding (Longest Run After One Flip), the MovieDB repository task (Node.js, Django or Spring Boot), situational judgement · 120 min", "mins": 120, "pools": [["flip"], ["watchlist-repo"], ["sjt"]]},
         "coding": {"name": "IIITD coding set", "desc": "Palindrome-Ready Subsequences + Even Blocks of At Most Two (IIIT Delhi, 4 July) · 70 min", "mins": 70, "pools": [["palsub"], ["evenrun"]]},
         "online2024": {"name": "Online coding set 2024", "desc": "Five coding questions reported from Amazon's 2024 online OAs (HackerRank) · 150 min", "mins": 150, "pools": [["findpairs"], ["parcels"], ["outlier"], ["winners"], ["qmarks"]]},
-        "repo": {"name": "Repository task", "desc": "MovieDB watchlist as a real project: pick your environment, then fix the backend until the tests pass · 60 min", "mins": 60, "pools": [["watchlist-repo"]]},
+        "ai": {"name": "SDE OA 2026 (AI-assisted)", "desc": "The AI-assisted format: one coding question (about 40 min), then one repository task, MovieDB or Return / Risk (about 60 min) · 100 min", "mins": 100, "pools": [[q["id"] for q in coding], REPOS]},
+        "repo": {"name": "Repository task", "desc": "One repository task, MovieDB watchlist or Return / Risk Evaluation: pick your environment, then fix the backend until the tests pass · 60 min", "mins": 60, "pools": [REPOS]},
         "custom": {"name": "Custom", "desc": "Pick the questions and the time", "mins": 60, "pools": []},
     },
-    "offlist": [
-        {"t": "Return/Risk Evaluation System (repo debugging)", "s": "Amazon SDE-1 Intern OA 2026 · section 2",
-         "why": "Only an outline was shared (7+ files, return-window checks, linked accounts, risk scoring, approve/review/reject decisions, 6 integrated tests). It is coming as a repository question, reconstructed from the outline. Until then the MovieDB repository task practises the same read-trace-fix workflow."},
-    ],
 }
 
 

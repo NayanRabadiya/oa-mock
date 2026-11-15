@@ -103,7 +103,8 @@ def listing():
         c["onlyLocal"] = bool(c["installed"] and st.get("git") and k not in head_trees)
         if c["installed"] or c["available"]:
             out.append(c)
-    out.sort(key=lambda c: (not c["installed"], c.get("name", c["key"]).lower()))
+    # yours first; within each, the practice banks (our own questions) before the companies
+    out.sort(key=lambda c: (not c["installed"], not c.get("own"), c.get("name", c["key"]).lower()))
     return {"git": st, "companies": out, "job": job()}
 
 
