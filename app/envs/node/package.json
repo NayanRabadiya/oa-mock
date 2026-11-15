@@ -1,0 +1,17 @@
+{
+  "name": "oa-mock-node-env",
+  "private": true,
+  "description": "The packages every Node.js (MERN) repository question uses. Installed into .oa-cache/envs/node by the app; each repository links to them. Keep the versions pinned (package-lock.json).",
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "dotenv": "16.4.5",
+    "express": "4.22.3",
+    "jsonwebtoken": "9.0.3",
+    "mongoose": "8.24.9"
+  },
+  "devDependencies": {
+    "jest": "29.7.0",
+    "mongodb-memory-server": "10.4.3",
+    "supertest": "7.3.2"
+  }
+}

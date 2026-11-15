@@ -225,9 +225,42 @@ def _kill(p):
         except Exception: pass
 
 
+def _link_node_modules(project):
+    """A Node repository uses the environment's packages: node_modules in the project points at them (a symlink,
+    or a directory junction on Windows), as if `npm install` had run there."""
+    link = os.path.join(project, "node_modules")
+    target = os.path.join(envs.ENV_DIR, "node", "node_modules")
+    if os.path.lexists(link):
+        if os.path.realpath(link) == os.path.realpath(target):
+            return
+        if os.path.islink(link):
+            os.unlink(link)
+        else:
+            shutil.rmtree(link, ignore_errors=True)
+    try:
+        os.symlink(target, link, target_is_directory=True)
+    except OSError:
+        if not IS_WIN:
+            raise
+        subprocess.run(["cmd", "/c", "mklink", "/J", link, target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+
 def _command(stack, project, report):
+    """(argv, extra environment variables, where the JUnit report ends up: a file or a folder of them)."""
     if stack == "django":
-        return [envs.python("django"), os.path.join(envs.ENV_SRC, "django", "run_tests.py"), project, report]
+        return [envs.python("django"), os.path.join(envs.ENV_SRC, "django", "run_tests.py"), project, report], {}, report
+    if stack == "spring":
+        reports = os.path.join(project, "target", "surefire-reports")
+        shutil.rmtree(reports, ignore_errors=True)
+        # offline: the environment downloaded everything once; the tests run against that
+        return [envs.maven(), "-o"] + envs.maven_args() + ["test"], envs.spring_env(), reports
+    if stack == "node":
+        node, _, _ = envs.node_tools()
+        _link_node_modules(project)
+        jest = os.path.join(envs.ENV_DIR, "node", "node_modules", "jest", "bin", "jest.js")
+        return ([node or "node", jest, "--ci", "--runInBand", "--forceExit", "--colors=false",
+                 "--reporters=default", "--reporters=" + os.path.join(envs.ENV_SRC, "node", "junit-reporter.js")],
+                dict(envs.node_env(), OA_JUNIT_OUT=report, FORCE_COLOR="0", CI="true"), report)
     raise RepoError("%s isn't supported yet" % stack)
 
 
@@ -235,8 +268,9 @@ def _run_in(stack, project, timeout=TEST_TIMEOUT):
     """Runs the stack's tests in `project`. Returns ({test id: {status, message, time}}, output, timed_out)."""
     report = os.path.join(tempfile.mkdtemp(prefix="oa-report-"), "unit.xml")
     extra = {"creationflags": getattr(subprocess, "CREATE_NO_WINDOW", 0)} if IS_WIN else {"start_new_session": True}
-    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1")
-    p = subprocess.Popen(_command(stack, project, report), cwd=project, stdin=subprocess.DEVNULL,
+    args, extra_env, report_at = _command(stack, project, report)
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1", **extra_env)
+    p = subprocess.Popen(args, cwd=project, stdin=subprocess.DEVNULL,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env, **extra)
     timed_out = False
     try:
@@ -247,30 +281,41 @@ def _run_in(stack, project, timeout=TEST_TIMEOUT):
         out, _ = p.communicate()
     output = out.decode("utf-8", "replace").replace(project + os.sep, "").replace(project, ".")
     results = {}
-    try:
-        root = ET.parse(report).getroot()
+    files = sorted(os.path.join(report_at, f) for f in os.listdir(report_at) if f.endswith(".xml")) \
+        if os.path.isdir(report_at) else [report_at]
+    for xml_file in files:
+        try:
+            root = ET.parse(xml_file).getroot()
+        except (OSError, ET.ParseError):
+            continue
         for case in root.iter("testcase"):
-            tid = "%s.%s" % (case.get("classname"), case.get("name"))
+            name = (case.get("name") or "")
+            name = name[:-2] if name.endswith("()") else name        # JUnit 5 under Surefire
+            tid = "%s.%s" % (case.get("classname"), name)
             status, msg = "passed", ""
             for child in case:
                 if child.tag in ("failure", "error", "skipped"):
                     status = {"failure": "failed", "error": "error", "skipped": "skipped"}[child.tag]
                     msg = (child.text or child.get("message") or "").replace(project + os.sep, "").replace(project, ".")
             results[tid] = {"status": status, "message": msg, "time": float(case.get("time") or 0)}
-    except (OSError, ET.ParseError):
-        pass
-    finally:
-        shutil.rmtree(os.path.dirname(report), ignore_errors=True)
+    shutil.rmtree(os.path.dirname(report), ignore_errors=True)
     if len(output) > OUTPUT_MAX:
         output = output[:OUTPUT_MAX // 2] + "\n… %d characters cut …\n" % (len(output) - OUTPUT_MAX) + output[-OUTPUT_MAX // 2:]
     return results, output, timed_out
 
 
 def _short_message(msg):
-    """The useful end of a traceback: the assertion and the line of the test that made it."""
+    """The useful part of a failure: the assertion and the line of the test that made it.
+    Python tracebacks end with the assertion; JavaScript (Jest) messages start with it, then the stack."""
     lines = [l for l in (msg or "").strip().splitlines() if l.strip()]
     if not lines:
         return ""
+    if any(l.lstrip().startswith("at ") for l in lines) and not lines[-1].startswith(("AssertionError", "Error")) \
+            and not lines[0].startswith("Traceback"):
+        head = [l.rstrip() for l in lines if not l.lstrip().startswith("at ")][:6]
+        frame = next((l.strip() for l in lines if l.lstrip().startswith("at ") and
+                      any(k in l.replace("\\", "/") for k in ("/tests/", ".test.js", "Tests.java", "Test.java"))), "")
+        return ("\n".join(head) + ("\n" + frame if frame else ""))[:800]
     tail = lines[-1]
     where = next((l.strip() for l in reversed(lines[:-1]) if l.strip().startswith("File ")), "")
     return (tail + ("\n" + where if where else ""))[:800]
@@ -326,7 +371,8 @@ def run(company, qid, stack, scope="visible", reveal_hidden=False, ws="practice"
     res = _graded(m, results, output, to, scope, reveal_hidden)
     res["ms"] = round((time.time() - t0) * 1000)
     if scope == "all":
-        res["output"] = _hide_hidden_names(m, res["output"]) if not reveal_hidden else res["output"]
+        hidden = _files(os.path.join(src, "hidden")) if os.path.isdir(os.path.join(src, "hidden")) else []
+        res["output"] = _hide_hidden_names(m, res["output"], hidden) if not reveal_hidden else res["output"]
     return res
 
 
@@ -337,7 +383,7 @@ def _overlay_readonly(m, start, proj):
             shutil.copyfile(os.path.join(start, rel), os.path.join(proj, rel))
 
 
-def _hide_hidden_names(m, output):
+def _hide_hidden_names(m, output, hidden_files=()):
     """During a test the hidden tests stay hidden: their names are replaced and their failure tracebacks (which
     quote the test's code) are left out of the output."""
     n = 0
@@ -345,14 +391,17 @@ def _hide_hidden_names(m, output):
         if t.get("hidden"):
             n += 1
             cls, _, name = t["id"].rpartition(".")
-            output = output.replace(name, "hidden_test_%d" % n).replace(cls, "hidden")
+            output = output.replace(name, "hidden_test_%d" % n).replace(cls, "hidden").replace(cls.rsplit(".", 1)[-1], "hidden")
+    for f in hidden_files:
+        output = output.replace(f, "(hidden tests)").replace(os.path.basename(f), "(hidden tests)")
     keep, skipping = [], False
     for line in output.splitlines():
-        if line.startswith(("FAIL: hidden_test_", "ERROR: hidden_test_")):
+        s = line.strip()
+        if line.startswith(("FAIL: hidden_test_", "ERROR: hidden_test_")) or s.startswith("● hidden ›"):
             skipping = True
             keep.append(line + "   (details hidden during the test)")
             continue
-        if skipping and (line.startswith("=" * 20) or line.startswith("Ran ")):
+        if skipping and (line.startswith("=" * 20) or line.startswith("Ran ") or s.startswith("● ") or s.startswith("Test Suites:")):
             skipping = False
         if not skipping:
             keep.append(line)

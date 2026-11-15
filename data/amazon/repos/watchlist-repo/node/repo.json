@@ -1,0 +1,163 @@
+{
+ "stack": "node",
+ "name": "MovieDB (MERN): User Watchlist",
+ "readonly": [
+  "README.md",
+  "package.json",
+  "jest.config.js",
+  "tests/*"
+ ],
+ "open": [
+  "controllers/watchlistController.js"
+ ],
+ "tests": [
+  {
+   "id": "WatchlistTests.get watchlist returns movies in order added",
+   "title": "GET /api/watchlist/ lists the user's movies in the order added",
+   "hidden": false
+  },
+  {
+   "id": "WatchlistTests.add movie creates entry and rejects duplicates",
+   "title": "Adding saves the entry; a duplicate gets 400",
+   "hidden": false
+  },
+  {
+   "id": "WatchlistTests.remove movie deletes entry and 404 when missing",
+   "title": "Removing deletes the entry; a missing one gets 404",
+   "hidden": false
+  },
+  {
+   "id": "WatchlistTests.check status returns boolean",
+   "title": "The status check returns true or false",
+   "hidden": false
+  },
+  {
+   "id": "WatchlistTests.rate limit blocks eleventh operation combined",
+   "title": "The 11th add/remove within 2 minutes gets 429",
+   "hidden": false
+  },
+  {
+   "id": "WatchlistTests.rate limit window slides after two minutes",
+   "title": "The 2-minute window slides",
+   "hidden": false
+  },
+  {
+   "id": "MoreWatchlistTests.add validation errors",
+   "title": "Add: missing, malformed and unknown movie ids",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.remove and check validation errors",
+   "title": "Remove and check: invalid ids",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.every route needs a token",
+   "title": "Every route needs a token",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.watchlists are per user",
+   "title": "Each user has their own watchlist",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.add remove and add again",
+   "title": "Add, remove, then add again",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.failed requests count toward the limit",
+   "title": "Failed requests count toward the limit",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.rejected requests do not count",
+   "title": "Rejected (429) requests don't count",
+   "hidden": true
+  },
+  {
+   "id": "MoreWatchlistTests.reads are not rate limited",
+   "title": "Reading the watchlist isn't rate limited",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "controllers/watchlistController.js",
+   "test": "get watchlist returns movies in order added",
+   "why": "getWatchlist calls Watchlist.findByUser(), which doesn't exist, so the list always fails with 500",
+   "fix": "Query the user's entries in the order they were added and populate the movies: Watchlist.find({ user: userId }).sort({ createdAt: 1, _id: 1 }).populate('movie').",
+   "edits": [
+    {
+     "fixed": "await Watchlist.find({ user: userId }).sort({ createdAt: 1, _id: 1 }).populate('movie');",
+     "buggy": "await Watchlist.findByUser(userId);"
+    }
+   ]
+  },
+  {
+   "file": "controllers/watchlistController.js",
+   "test": "add movie creates entry and rejects duplicates",
+   "why": "addToWatchlist answers 201 but never saves the entry, and never checks for duplicates",
+   "fix": "Answer 400 \"Movie already in watchlist\" when an entry exists, otherwise Watchlist.create(...). Error code 11000 from the unique index is only a safety net.",
+   "edits": [
+    {
+     "fixed": "    const existing = await Watchlist.findOne({ user: userId, movie: movieId });\n    if (existing) {\n      return res.status(400).json({ message: 'Movie already in watchlist' });\n    }\n\n    await Watchlist.create({ user: userId, movie: movieId });\n\n",
+     "buggy": ""
+    }
+   ]
+  },
+  {
+   "file": "controllers/watchlistController.js",
+   "test": "remove movie deletes entry and 404 when missing",
+   "why": "removeFromWatchlist never deletes anything and never answers 404",
+   "fix": "Watchlist.findOneAndDelete({ user: userId, movie: movieId }), then 404 \"Movie not found in watchlist\" when nothing was deleted.",
+   "edits": [
+    {
+     "fixed": "    const deleted = await Watchlist.findOneAndDelete({ user: userId, movie: movieId });\n    if (!deleted) {\n      return res.status(404).json({ message: 'Movie not found in watchlist' });\n    }\n\n",
+     "buggy": ""
+    }
+   ]
+  },
+  {
+   "file": "controllers/watchlistController.js",
+   "test": "check status returns boolean",
+   "why": "checkWatchlistStatus returns the array from find() instead of true / false",
+   "fix": "!!(await Watchlist.findOne({ user: userId, movie: movieId })).",
+   "edits": [
+    {
+     "fixed": "    const entry = await Watchlist.findOne({ user: userId, movie: movieId });",
+     "buggy": "    const isInWatchlist = await Watchlist.find({ user: userId, movie: movieId });"
+    },
+    {
+     "fixed": "res.json({ isInWatchlist: !!entry });",
+     "buggy": "res.json({ isInWatchlist });"
+    }
+   ]
+  },
+  {
+   "file": "middleware/rateLimiter.js",
+   "test": "rate limit window slides after two minutes",
+   "why": "watchlistRateLimiter is broken: windowMs is never defined, the filter keeps the expired timestamps (>= instead of <), `if (requests)` is always true (an empty array is truthy), and validRequests is never declared",
+   "fix": "Define windowMs = 2 minutes, keep the timestamps with now - t < windowMs, reject when 10 or more remain, otherwise push now.",
+   "edits": [
+    {
+     "fixed": "    const windowMs = 2 * 60 * 1000;\n    const userRequests = rateLimitStore.get(key);\n    const validRequests = userRequests.filter(\n      (timestamp) => now - timestamp < windowMs\n    );\n\n    if (validRequests.length >= 10) {",
+     "buggy": "    const userRequests = rateLimitStore.get(key);\n    const requests = userRequests.filter(\n      (timestamp) => now - timestamp >= windowMs\n    );\n\n    if (requests) {"
+    }
+   ]
+  },
+  {
+   "file": "routes/watchlistRoutes.js",
+   "test": "rate limit blocks eleventh operation combined",
+   "why": "the routes never use watchlistRateLimiter for add and remove",
+   "fix": "watchlistRouter.post('/add', watchlistRateLimiter(), addToWatchlist) and the same for remove. Passing watchlistRateLimiter without calling it hangs the request.",
+   "edits": [
+    {
+     "fixed": "watchlistRouter.post('/add', watchlistRateLimiter(), addToWatchlist);\nwatchlistRouter.post('/remove', watchlistRateLimiter(), removeFromWatchlist);",
+     "buggy": "watchlistRouter.post('/add', addToWatchlist);\nwatchlistRouter.post('/remove', removeFromWatchlist);"
+    }
+   ]
+  }
+ ]
+}

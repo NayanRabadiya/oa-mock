@@ -95,7 +95,7 @@ watchlist_repo = {
     "id": "watchlist-repo", "type": "repo", "title": "MovieDB Watchlist (repository)", "diff": "Repo",
     "src": "Amazon SDE Intern OA 2026 · section 2, AI-assisted repository task",
     "body": open(H('watchlist_repo.html')).read().strip(),
-    "stacks": ["django"],
+    "stacks": ["node", "django", "spring"],
     "inp": "", "out": "", "cons": [], "samples": [], "hidden": [], "ref": "", "lc": None, "lcurl": None,
 }
 
