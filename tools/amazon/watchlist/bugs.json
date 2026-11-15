@@ -1,0 +1,91 @@
+[
+ {
+  "why": "getWatchlist calls Watchlist.findByUser, which doesn't exist (and the list must hold movie documents)",
+  "edits": [
+   {
+    "fixed": "await Watchlist.find({ user: userId }).populate('movie');",
+    "buggy": "await Watchlist.findByUser(userId);"
+   }
+  ]
+ },
+ {
+  "why": "addToWatchlist answers 201 without saving anything: no duplicate check, no Watchlist.create",
+  "edits": [
+   {
+    "fixed": "    const existing = await Watchlist.findOne({ user: userId, movie: movieId });\n    if (existing) {\n      return res.status(400).json({ message: 'Movie already in watchlist' });\n    }\n\n    await Watchlist.create({ user: userId, movie: movieId });\n\n",
+    "buggy": ""
+   }
+  ]
+ },
+ {
+  "why": "removeFromWatchlist never deletes the entry and never answers 404",
+  "edits": [
+   {
+    "fixed": "    const deleted = await Watchlist.findOneAndDelete({ user: userId, movie: movieId });\n    if (!deleted) {\n      return res.status(404).json({ message: 'Movie not found in watchlist' });\n    }\n\n",
+    "buggy": ""
+   }
+  ]
+ },
+ {
+  "why": "checkWatchlistStatus returns the array from find() instead of a boolean",
+  "edits": [
+   {
+    "fixed": "    const entry = await Watchlist.findOne({ user: userId, movie: movieId });",
+    "buggy": "    const isInWatchlist = await Watchlist.find({ user: userId, movie: movieId });"
+   },
+   {
+    "fixed": "res.json({ isInWatchlist: !!entry });",
+    "buggy": "res.json({ isInWatchlist });"
+   }
+  ]
+ },
+ {
+  "why": "watchlistRateLimiter: validRequests is never declared (the filter result is called requests)",
+  "edits": [
+   {
+    "fixed": "    const windowMs = 2 * 60 * 1000;\n    const userRequests = rateLimitStore.get(key);\n    const validRequests = userRequests.filter(",
+    "buggy": "    const windowMs = 2 * 60 * 1000;\n    const userRequests = rateLimitStore.get(key);\n    const requests = userRequests.filter("
+   }
+  ]
+ },
+ {
+  "why": "watchlistRateLimiter: windowMs is never defined",
+  "edits": [
+   {
+    "fixed": "    const windowMs = 2 * 60 * 1000;\n",
+    "buggy": ""
+   }
+  ]
+ },
+ {
+  "why": "watchlistRateLimiter: the filter keeps the expired timestamps (>= instead of <)",
+  "edits": [
+   {
+    "fixed": "      (timestamp) => now - timestamp < windowMs\n    );\n\n    if (validRequests.length >= 10)",
+    "buggy": "      (timestamp) => now - timestamp >= windowMs\n    );\n\n    if (validRequests.length >= 10)"
+   }
+  ]
+ },
+ {
+  "why": "watchlistRateLimiter: if (requests) is always true, because an empty array is truthy",
+  "edits": [
+   {
+    "fixed": "if (validRequests.length >= 10) {",
+    "buggy": "if (requests) {"
+   }
+  ]
+ },
+ {
+  "why": "the routes never use the rate limiter for add and remove",
+  "edits": [
+   {
+    "fixed": "watchlistRouter.post('/add', watchlistRateLimiter(), addToWatchlist);",
+    "buggy": "watchlistRouter.post('/add', addToWatchlist);"
+   },
+   {
+    "fixed": "watchlistRouter.post('/remove', watchlistRateLimiter(), removeFromWatchlist);",
+    "buggy": "watchlistRouter.post('/remove', removeFromWatchlist);"
+   }
+  ]
+ }
+]

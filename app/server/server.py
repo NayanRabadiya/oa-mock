@@ -266,7 +266,7 @@ def _preview(q):
     """What the check page shows of a question: no test data (it can be megabytes)."""
     if not isinstance(q, dict):
         return q
-    out = {k: v for k, v in q.items() if k not in ("hidden", "samples", "wrong", "driver")}
+    out = {k: v for k, v in q.items() if k not in ("hidden", "samples", "wrong", "driver", "bugs")}
     out["samples"] = len(q.get("samples") or []); out["hidden"] = len(q.get("hidden") or [])
     return out
 

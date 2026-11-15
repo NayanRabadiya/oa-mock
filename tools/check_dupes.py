@@ -41,7 +41,10 @@ def load(path):
         q = json.load(f)
     company = os.path.basename(os.path.dirname(os.path.dirname(path)))
     q["_key"] = "%s/%s" % (company, q.get("id", os.path.basename(path)[:-5]))
-    q["_sh"] = shingles(words(q.get("body", "")))
+    text = q.get("body", "")
+    if q.get("type") == "sjt":       # the body is a generic intro; the scenarios are the question
+        text = " ".join(it.get("s", "") for it in q.get("items", []) if isinstance(it, dict))
+    q["_sh"] = shingles(words(text))
     q["_title"] = " ".join(words(q.get("title", "")))
     q["_samples"] = {(s.get("in", "").strip(), str(s.get("out", "")).strip()) for s in q.get("samples", []) if "in" in s}
     return q
