@@ -37,6 +37,7 @@ function bindSjt(e, q){
 function bindExam(){
   const e = S.exam, id = e.ids[e.cur], q = QMAP[id];
   if (q.type === "sjt") return bindSjt(e, q);
+  if (q.type === "repo") return bindRepo(e, q);
   const fit = () => { const ex = document.querySelector(".exam"), bar = document.querySelector(".bar"); if (ex && bar && innerWidth > 900) ex.style.height = (innerHeight - bar.getBoundingClientRect().bottom) + "px"; else if (ex) ex.style.height = ""; if (cm) cm.refresh(); };
   window.onresize = fit; setTimeout(fit, 0);
   bindPanels();
@@ -57,6 +58,7 @@ function bindExam(){
 let busy = false;
 async function doRun(full){
   if (busy || !S.exam || S.exam.ended) return;
+  if (QMAP[S.exam.ids[S.exam.cur]].type === "repo") return repoRun(full);
   saveCode();
   const e = S.exam, id = e.ids[e.cur], q = QMAP[id], lang = e.lang[id];
   if (q.type === "sjt") return;

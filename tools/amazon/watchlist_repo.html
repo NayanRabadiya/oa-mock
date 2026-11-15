@@ -1,0 +1,13 @@
+<p><b>MovieDB</b> is an app that allows users to explore movies, submit ratings, and share reviews.</p>
+<p>The <b>watchlist</b> feature helps users save and manage movies they want to watch later. Currently, this feature is not functioning correctly on the backend, affecting usability and engagement.</p>
+<p><b>Issue summary:</b> users can add movies to their watchlist, but these movies do not appear on the Watchlist page. Fix the backend of the watchlist feature.</p>
+<p><b>Steps to reproduce</b> (the app's pages call these API routes):</p>
+<ol>
+<li>Log in with the test credentials <code>sam.rivera@email.com</code> / <code>Password@123</code> (<code>POST /api/auth/login</code>).</li>
+<li>Select a movie and add it to the watchlist (<code>POST /api/watchlist/add</code>).</li>
+<li>Open the Watchlist page (<code>GET /api/watchlist/</code>). The movie should appear here, but currently there are none.</li>
+<li>Users should be able to remove movies from the watchlist, either from the Watchlist page or by toggling <i>Add to Watchlist</i> on the movie page (<code>POST /api/watchlist/remove</code>, <code>GET /api/watchlist/check/&lt;movieId&gt;</code>). This doesn't work either.</li>
+</ol>
+<p><b>Additional requirements:</b> to prevent spam or automated activity, the system must apply rate limiting. Each user can only add or remove movies up to 10 times within any 2-minute period.</p>
+<p>Refer to the <code>README.md</code> file for more details.</p>
+<p><b>Note:</b> the acceptance criteria for this task require that your solution pass all predefined unit tests. Use failing test cases to guide debugging. More tests run when you submit.</p>

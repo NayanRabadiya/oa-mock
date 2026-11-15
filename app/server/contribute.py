@@ -20,9 +20,9 @@ TOOLS = os.path.join(data.ROOT, "tools")
 STYLE = os.path.join(TOOLS, "style")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}$")
 DIFFS = ("Easy", "Medium", "Hard")
-TYPES = ("code", "sql", "debug", "sjt")
-LABEL = {"sql": "SQL", "debug": "Debug", "sjt": "SJT"}          # their "diff" (the pill in the bank)
-NAME = {"code": "coding", "sql": "SQL", "debug": "debugging", "sjt": "situational-judgement"}
+TYPES = ("code", "sql", "debug", "sjt", "repo")
+LABEL = {"sql": "SQL", "debug": "Debug", "sjt": "SJT", "repo": "Repo"}          # their "diff" (the pill in the bank)
+NAME = {"code": "coding", "sql": "SQL", "debug": "debugging", "sjt": "situational-judgement", "repo": "repository"}
 JS_LIMIT = 4000                      # what JavaScript gets in the page (LIMIT.js)
 PY_LIMIT = 5000                      # what a Python answer gets on the platform (grading.LIMIT_MS)
 MAX_BYTES = 20 * 1024 * 1024
@@ -71,7 +71,7 @@ def _tidy(q):
                     t["in"] += "\n"
     if kind in LABEL and "diff" not in q:
         q["diff"] = LABEL[kind]
-    if kind == "sjt":
+    if kind in ("sjt", "repo"):
         for k, v in (("inp", ""), ("out", ""), ("cons", []), ("samples", []), ("hidden", []), ("ref", "")):
             q.setdefault(k, v)
     if kind in ("sql", "debug"):
@@ -168,6 +168,19 @@ def _sjt_format(q, errs, warns):
         errs.append('"items" must list the scenarios: [{"lp", "s", "o": [[option, score], ...], "why"}]')
 
 
+def _repo_format(q, errs, warns, company=None):
+    stacks = q.get("stacks")
+    if not isinstance(stacks, list) or not stacks or not all(isinstance(s, str) for s in stacks):
+        errs.append('"stacks" must list the environments the repository comes in, e.g. ["django"]'); return
+    from . import repos
+    for s in stacks:
+        try:
+            repos.src_dir(company, q.get("id"), s)
+        except Exception:
+            errs.append("data/%s/repos/%s/%s/repo.json is missing. A repository question is a folder (the repo, its fixes, "
+                        "hidden tests and repo.json), so it can't be pasted here: see CONTRIBUTING.md" % (company, q.get("id"), s))
+
+
 def _format(company, q, replace):
     errs, warns = [], []
     if not data.KEY_RE.match(company or ""):
@@ -191,7 +204,10 @@ def _format(company, q, replace):
     else:
         if q.get("diff") != LABEL[kind]:
             errs.append('"diff" must be "%s" for a %s question' % (LABEL[kind], NAME[kind]))
-        {"sql": _sql_format, "debug": _debug_format, "sjt": _sjt_format}[kind](q, errs, warns)
+        if kind == "repo":
+            _repo_format(q, errs, warns, company)
+        else:
+            {"sql": _sql_format, "debug": _debug_format, "sjt": _sjt_format}[kind](q, errs, warns)
     if "cons" in q and not (isinstance(q["cons"], list) and all(isinstance(c, str) for c in q["cons"])):
         errs.append('"cons" must be a list of strings')
     if "year" in q and not (isinstance(q["year"], int) and 2000 <= q["year"] <= 2100):
@@ -220,7 +236,13 @@ def check(company, q, replace=False):
         return {"ok": False, "checks": checks, "question": q}
     kind = q.get("type", "code")
     if kind != "code":
-        {"sql": _check_sql, "debug": _check_debug, "sjt": _check_sjt}[kind](q, add)
+        if kind == "repo":
+            from . import repos
+            for s in q["stacks"]:
+                for name, status, detail in repos.verify(company, q["id"], s):
+                    add(name, status, detail)
+        else:
+            {"sql": _check_sql, "debug": _check_debug, "sjt": _check_sjt}[kind](q, add)
         add("Not already in the bank", *_dupes(company, q, check_dupes))
         return {"ok": not any(c["status"] == "fail" for c in checks), "checks": checks, "question": q}
     key = "%s/%s" % (company, q["id"])

@@ -1,0 +1,159 @@
+{
+ "stack": "django",
+ "name": "MovieDB (Django): User Watchlist",
+ "readonly": [
+  "README.md",
+  "requirements.txt",
+  "manage.py",
+  "watchlist/tests/*"
+ ],
+ "open": [
+  "watchlist/views.py"
+ ],
+ "tests": [
+  {
+   "id": "watchlist.tests.test_watchlist.WatchlistTests.test_get_watchlist_returns_movies_in_order_added",
+   "title": "GET /api/watchlist/ lists the user's movies in the order added",
+   "hidden": false
+  },
+  {
+   "id": "watchlist.tests.test_watchlist.WatchlistTests.test_add_movie_creates_entry_and_rejects_duplicates",
+   "title": "Adding saves the entry; a duplicate gets 400",
+   "hidden": false
+  },
+  {
+   "id": "watchlist.tests.test_watchlist.WatchlistTests.test_remove_movie_deletes_entry_and_404_when_missing",
+   "title": "Removing deletes the entry; a missing one gets 404",
+   "hidden": false
+  },
+  {
+   "id": "watchlist.tests.test_watchlist.WatchlistTests.test_check_status_returns_boolean",
+   "title": "The status check returns true or false",
+   "hidden": false
+  },
+  {
+   "id": "watchlist.tests.test_watchlist.WatchlistTests.test_rate_limit_blocks_eleventh_operation_combined",
+   "title": "The 11th add/remove within 2 minutes gets 429",
+   "hidden": false
+  },
+  {
+   "id": "watchlist.tests.test_watchlist.WatchlistTests.test_rate_limit_window_slides_after_two_minutes",
+   "title": "The 2-minute window slides",
+   "hidden": false
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_add_validation_errors",
+   "title": "Add: missing, malformed and unknown movie ids",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_remove_and_check_validation_errors",
+   "title": "Remove and check: invalid ids",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_every_route_needs_a_token",
+   "title": "Every route needs a token",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_watchlists_are_per_user",
+   "title": "Each user has their own watchlist",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_add_remove_and_add_again",
+   "title": "Add, remove, then add again",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_failed_requests_count_toward_the_limit",
+   "title": "Failed requests count toward the limit",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_rejected_requests_do_not_count",
+   "title": "Rejected (429) requests don't count",
+   "hidden": true
+  },
+  {
+   "id": "watchlist.tests.test_more.MoreWatchlistTests.test_reads_are_not_rate_limited",
+   "title": "Reading the watchlist isn't rate limited",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "watchlist/views.py",
+   "test": "test_get_watchlist_returns_movies_in_order_added",
+   "why": "get_watchlist calls Watchlist.objects.for_user(), which doesn't exist, so the list always fails with 500",
+   "fix": "Query the user's entries in the order they were added: Watchlist.objects.filter(user=request.user).select_related(\"movie\").order_by(\"created_at\", \"id\").",
+   "edits": [
+    {
+     "fixed": "        entries = Watchlist.objects.filter(user=request.user).select_related(\"movie\").order_by(\"created_at\", \"id\")\n        movies = [entry.movie for entry in entries]",
+     "buggy": "        entries = Watchlist.objects.for_user(request.user)\n        movies = [entry.movie for entry in entries if entry.movie]"
+    }
+   ]
+  },
+  {
+   "file": "watchlist/views.py",
+   "test": "test_add_movie_creates_entry_and_rejects_duplicates",
+   "why": "add_to_watchlist builds a Watchlist object but never saves it, and never checks for duplicates",
+   "fix": "Answer 400 \"Movie already in watchlist\" when the entry exists, otherwise Watchlist.objects.create(...). The unique constraint and the IntegrityError branch are only a safety net.",
+   "edits": [
+    {
+     "fixed": "        if Watchlist.objects.filter(user=request.user, movie=movie).exists():\n            return error(\"Movie already in watchlist\", status.HTTP_400_BAD_REQUEST)\n        Watchlist.objects.create(user=request.user, movie=movie)\n",
+     "buggy": "        entry = Watchlist(user=request.user, movie=movie)\n"
+    }
+   ]
+  },
+  {
+   "file": "watchlist/views.py",
+   "test": "test_remove_movie_deletes_entry_and_404_when_missing",
+   "why": "remove_from_watchlist builds a query but never deletes anything, and never answers 404",
+   "fix": "deleted, _ = Watchlist.objects.filter(user=request.user, movie_id=movie_id).delete(), then 404 \"Movie not found in watchlist\" when nothing was deleted.",
+   "edits": [
+    {
+     "fixed": "        deleted, _ = Watchlist.objects.filter(user=request.user, movie_id=movie_id).delete()\n        if not deleted:\n            return error(\"Movie not found in watchlist\", status.HTTP_404_NOT_FOUND)\n",
+     "buggy": "        entry = Watchlist.objects.filter(user=request.user, movie_id=movie_id)\n"
+    }
+   ]
+  },
+  {
+   "file": "watchlist/views.py",
+   "test": "test_check_status_returns_boolean",
+   "why": "check_watchlist_status returns a list of rows instead of true / false",
+   "fix": "Use .exists(), which returns a boolean.",
+   "edits": [
+    {
+     "fixed": "        in_watchlist = Watchlist.objects.filter(user=request.user, movie_id=movie_id).exists()",
+     "buggy": "        in_watchlist = list(Watchlist.objects.filter(user=request.user, movie_id=movie_id).values(\"id\"))"
+    }
+   ]
+  },
+  {
+   "file": "watchlist/urls.py",
+   "test": "test_remove_movie_deletes_entry_and_404_when_missing",
+   "why": "the remove route points at the add view, so POST /api/watchlist/remove adds the movie again",
+   "fix": "Route \"remove\" to views.remove_from_watchlist.",
+   "edits": [
+    {
+     "fixed": "    path(\"remove\", views.remove_from_watchlist),",
+     "buggy": "    path(\"remove\", views.add_to_watchlist),"
+    }
+   ]
+  },
+  {
+   "file": "watchlist/throttling.py",
+   "test": "test_rate_limit_blocks_eleventh_operation_combined",
+   "why": "the rate limiter keeps the expired timestamps (>= instead of <), so recent requests are never counted and nobody is limited",
+   "fix": "Keep the timestamps with current - stamp < WINDOW_SECONDS.",
+   "edits": [
+    {
+     "fixed": "if current - stamp < WINDOW_SECONDS]",
+     "buggy": "if current - stamp >= WINDOW_SECONDS]"
+    }
+   ]
+  }
+ ]
+}

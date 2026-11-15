@@ -18,6 +18,9 @@ Checks, by "type" (see app/server/contribute.py):
   debug             the fixed files ("ref") pass every test; the buggy files ("starter") fail one; each bug in "bugs",
                     put back into the fixed files on its own, fails a test
   sjt               every scenario has 3-6 options, each scored 0/1/2, exactly one best answer, and a reason
+  repo              per stack: the repository with the fixes in solution/ passes every test (hidden ones too), the
+                    starting repository fails a visible test, and each bug in repo.json, on its own, fails a test.
+                    Needs that stack's environment (python3 tools/setup_env.py django)
 and for every type: not already in the bank. SQL and debugging need Node.js (node). Exit code 1 if any check fails.
 """
 import json, os, subprocess, sys
@@ -49,7 +52,14 @@ def from_bank(path):
 def changed(ref):
     out = subprocess.run(["git", "-C", ROOT, "diff", "--name-only", "--diff-filter=AM", ref, "--", "data/"],
                          stdout=subprocess.PIPE, check=True).stdout.decode().split()
-    return [os.path.join(ROOT, p) for p in out if p.count("/") == 3 and "/questions/" in p and p.endswith(".json")]
+    paths = [os.path.join(ROOT, p) for p in out if p.count("/") == 3 and "/questions/" in p and p.endswith(".json")]
+    for p in out:                       # a change inside data/<company>/repos/<qid>/ re-checks that question
+        bits = p.split("/")
+        if len(bits) > 4 and bits[2] == "repos":
+            q = os.path.join(ROOT, "data", bits[1], "questions", bits[3] + ".json")
+            if os.path.isfile(q) and q not in paths:
+                paths.append(q)
+    return paths
 
 
 def main(argv):
