@@ -168,19 +168,16 @@ Every **Submit** is saved twice: once as the plain source file, and once as a sm
 | Coding | Largest Potential Outlier (Easy) | 2024 online OA (HackerRank) |
 | Coding | Capable Tournament Winners (Medium) | 2024 online OA (HackerRank) |
 | Coding | Fewest Wildcards in a Common Pattern (Medium) | 2024 online OA (HackerRank) |
-| Repo debugging | **MovieDB Watchlist (MERN)**, in the browser | SDE Intern OA 2026, section 2 |
-| Repository task | **MovieDB Watchlist (repository)**: a real Django project; Node.js and Spring Boot next | SDE Intern OA 2026, section 2 (AI-assisted repo task) |
+| Repository task | **MovieDB Watchlist (repository)**: a real project in Node.js (MERN), Django or Spring Boot | SDE Intern OA 2026, section 2 (AI-assisted repo task) |
 | Situational judgement | 12 workplace scenarios | Section 3 (scenarios written for this mock) |
 
 Amazon's coding questions are **LeetCode-style**. You complete `class Solution` (or a function in JavaScript) in any of the four languages and return the answer. A hidden driver reads the input and prints your result, so Run, Submit and Custom input work as usual.
 
-**Formats:** SDE Intern OA 2026 (all 3 sections, 120 min) · IIITD coding set (70 min) · Online coding set 2024 (5 questions, 150 min) · Repository task (60 min) · Debugging section (60 min) · Custom.
+**Formats:** SDE Intern OA 2026 (all 3 sections, 120 min) · IIITD coding set (70 min) · Online coding set 2024 (5 questions, 150 min) · Repository task (60 min) · Custom.
 
-The **repo-debugging** question recreates the real task. You get the watchlist controller, rate limiter and routes with the bugs reported from the OA: the list never shows added movies, removal doesn't delete, the status check returns the wrong type, and the "10 operations per 2 minutes" rate limiter is broken and not wired in. It runs against an in-memory Express/Mongo stand-in with 10 integration tests. Server logs appear as `[log]` lines.
+The **repository task** is the same bug hunt as the real OA's repo section: a real project in a small IDE (file tree, tabs, README, read-only tests), with **Run tests** and **Submit** like HackerRank's Code Repository questions. You pick the environment first. If it isn't set up, the app says what it installs, how big it is and how long it takes, then installs it into its own folder (`.oa-cache/envs/`). You can set up several and switch in practice; a timed test keeps the one you chose and starts from a fresh copy of the repository. Each version has 6 bugs (4 in the controller, 1 in the routes, 1 in the rate limiter, as reported from the OA), 6 visible tests and 8 more on Submit. Setting up an environment takes a minute or a few: Node.js about 100 MB to download (it includes a MongoDB that runs in memory for the tests), Django about 10 MB, Spring Boot about 80 MB (Maven and the Spring libraries). It needs Node.js 18+, Python 3.10+ or Java 17+ on your computer; the app says how to get it if it is missing.
 
-![Repo debugging question](docs/debugging.png)
-
-The **repository task** is the same bug hunt as the real OA's repo section: a real project in a small IDE (file tree, tabs, README, read-only tests), with **Run tests** and **Submit** like HackerRank's Code Repository questions. You pick the environment first. If it isn't set up, the app says what it installs, how big it is and how long it takes, then installs it into its own folder (`.oa-cache/envs/`). You can set up several and switch in practice; a timed test keeps the one you chose and starts from a fresh copy of the repository. The Django version has 6 bugs (4 in the views, 1 in the routes, 1 in the rate limiter), 6 visible tests and 8 more on Submit.
+![Repository task](docs/repository.png)
 
 The *Return/Risk Evaluation* repo task is listed but can't be run, because only an outline of it was reported.
 
@@ -238,7 +235,7 @@ app/server/                backend (Python 3.8+, stdlib only; tools import it as
   grading.py               runs an answer on a question's tests on the server (hidden tests never reach the page)
   library.py               companies here vs on GitHub; download / update / remove with git sparse checkout
   contribute.py            checks a new question, saves it, opens a pull request with the GitHub CLI
-  envs.py                  environments for repository questions (Django; Node.js and Spring Boot next), set up
+  envs.py                  environments for repository questions (Node.js, Django, Spring Boot), set up
                            into .oa-cache/envs/ with a size and time estimate
   repos.py                 repository questions: your working copy, files, Run tests / Submit (JUnit report)
   submissions.py           saves / lists / reads past submissions in .oa-cache/
@@ -270,7 +267,7 @@ tools/
   check_dupes.py           finds questions already in the bank (text overlap; --deep compares answers)
   add_question.py          the question checks (same as the app and the pull-request check); --save adds it
   js_check.js              runs SQL (AlaSQL) and JavaScript with the page's own code, for the SQL and debugging checks
-  setup_env.py             sets up an environment for repository questions (Django) from a terminal
+  setup_env.py             sets up an environment for repository questions (node, django, spring) from a terminal
   build_catalog.py         rewrites data/catalog.json (pull requests include it; the PR check verifies it)
   smoke.py                 starts the app, loads its pages and grades an answer (pull-request check)
   check_contrast.py        checks every text/background pair in tokens.css meets WCAG contrast, light and dark

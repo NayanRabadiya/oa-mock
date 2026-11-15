@@ -1,0 +1,158 @@
+{
+ "stack": "spring",
+ "name": "MovieDB (Spring Boot): User Watchlist",
+ "readonly": [
+  "README.md",
+  "pom.xml",
+  "src/test/*"
+ ],
+ "open": [
+  "src/main/java/com/moviedb/controller/WatchlistController.java"
+ ],
+ "tests": [
+  {
+   "id": "com.moviedb.watchlist.WatchlistTests.getWatchlistReturnsMoviesInOrderAdded",
+   "title": "GET /api/watchlist/ lists the user's movies in the order added",
+   "hidden": false
+  },
+  {
+   "id": "com.moviedb.watchlist.WatchlistTests.addMovieCreatesEntryAndRejectsDuplicates",
+   "title": "Adding saves the entry; a duplicate gets 400",
+   "hidden": false
+  },
+  {
+   "id": "com.moviedb.watchlist.WatchlistTests.removeMovieDeletesEntryAnd404WhenMissing",
+   "title": "Removing deletes the entry; a missing one gets 404",
+   "hidden": false
+  },
+  {
+   "id": "com.moviedb.watchlist.WatchlistTests.checkStatusReturnsBoolean",
+   "title": "The status check returns true or false",
+   "hidden": false
+  },
+  {
+   "id": "com.moviedb.watchlist.WatchlistTests.rateLimitBlocksEleventhOperationCombined",
+   "title": "The 11th add/remove within 2 minutes gets 429",
+   "hidden": false
+  },
+  {
+   "id": "com.moviedb.watchlist.WatchlistTests.rateLimitWindowSlidesAfterTwoMinutes",
+   "title": "The 2-minute window slides",
+   "hidden": false
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.addValidationErrors",
+   "title": "Add: missing, malformed and unknown movie ids",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.removeAndCheckValidationErrors",
+   "title": "Remove and check: invalid ids",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.everyRouteNeedsAToken",
+   "title": "Every route needs a token",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.watchlistsArePerUser",
+   "title": "Each user has their own watchlist",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.addRemoveAndAddAgain",
+   "title": "Add, remove, then add again",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.failedRequestsCountTowardTheLimit",
+   "title": "Failed requests count toward the limit",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.rejectedRequestsDoNotCount",
+   "title": "Rejected (429) requests don't count",
+   "hidden": true
+  },
+  {
+   "id": "com.moviedb.watchlist.MoreWatchlistTests.readsAreNotRateLimited",
+   "title": "Reading the watchlist isn't rate limited",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "src/main/java/com/moviedb/controller/WatchlistController.java",
+   "test": "getWatchlistReturnsMoviesInOrderAdded",
+   "why": "getWatchlist looks the entries up by movie id (with the user's id), so the list is always empty",
+   "fix": "Use watchlistRepository.findByUserIdOrderByCreatedAtAscIdAsc(userId): the user's entries in the order they were added.",
+   "edits": [
+    {
+     "fixed": "List<Watchlist> entries = watchlistRepository.findByUserIdOrderByCreatedAtAscIdAsc(userId);",
+     "buggy": "List<Watchlist> entries = watchlistRepository.findByMovieId(String.valueOf(userId));"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/moviedb/controller/WatchlistController.java",
+   "test": "addMovieCreatesEntryAndRejectsDuplicates",
+   "why": "addToWatchlist builds a Watchlist entry but never saves it, and never checks for duplicates",
+   "fix": "Answer 400 \"Movie already in watchlist\" when existsByUserIdAndMovieId(...), otherwise watchlistRepository.save(...). The unique constraint and the DataIntegrityViolationException branch are only a safety net.",
+   "edits": [
+    {
+     "fixed": "            if (watchlistRepository.existsByUserIdAndMovieId(userId, movieId)) {\n                return error(400, \"Movie already in watchlist\");\n            }\n            watchlistRepository.save(new Watchlist(userId, movie.get()));\n",
+     "buggy": "            Watchlist entry = new Watchlist(userId, movie.get());\n"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/moviedb/controller/WatchlistController.java",
+   "test": "removeMovieDeletesEntryAnd404WhenMissing",
+   "why": "removeFromWatchlist looks the entry up but never deletes it, and never answers 404",
+   "fix": "long deleted = watchlistRepository.deleteByUserIdAndMovieId(userId, movieId), then 404 \"Movie not found in watchlist\" when it's 0.",
+   "edits": [
+    {
+     "fixed": "            long deleted = watchlistRepository.deleteByUserIdAndMovieId(userId, movieId);\n            if (deleted == 0) {\n                return error(404, \"Movie not found in watchlist\");\n            }\n",
+     "buggy": "            List<Watchlist> entries = watchlistRepository.findByUserIdAndMovieId(userId, movieId);\n"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/moviedb/controller/WatchlistController.java",
+   "test": "checkStatusReturnsBoolean",
+   "why": "checkWatchlistStatus returns the list of entries instead of true / false",
+   "fix": "Use existsByUserIdAndMovieId(...), which returns a boolean.",
+   "edits": [
+    {
+     "fixed": "            boolean inWatchlist = watchlistRepository.existsByUserIdAndMovieId(userId, movieId);",
+     "buggy": "            List<Watchlist> inWatchlist = watchlistRepository.findByUserIdAndMovieId(userId, movieId);"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/moviedb/config/WebConfig.java",
+   "test": "rateLimitBlocksEleventhOperationCombined",
+   "why": "the limiter's path pattern for remove has a trailing slash, so POST /api/watchlist/remove isn't limited (Spring 6 doesn't match trailing slashes)",
+   "fix": "Register the interceptor for \"/api/watchlist/remove\", without the slash.",
+   "edits": [
+    {
+     "fixed": ".addPathPatterns(\"/api/watchlist/add\", \"/api/watchlist/remove\");",
+     "buggy": ".addPathPatterns(\"/api/watchlist/add\", \"/api/watchlist/remove/\");"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/moviedb/ratelimit/WatchlistRateLimiter.java",
+   "test": "rateLimitWindowSlidesAfterTwoMinutes",
+   "why": "the rate limiter keeps the expired timestamps (>= instead of <), so recent requests are never counted and nobody is limited",
+   "fix": "Keep the timestamps with now - stamp < WINDOW_MS.",
+   "edits": [
+    {
+     "fixed": "if (now - stamp < WINDOW_MS) {",
+     "buggy": "if (now - stamp >= WINDOW_MS) {"
+    }
+   ]
+  }
+ ]
+}

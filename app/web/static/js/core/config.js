@@ -26,5 +26,11 @@ const store = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 };
 let S = { view:"home", exam:store.get(K + "-exam", null), fmt:CFG.defaultFmt, custom:CFG.custom.slice(), customMins:60, lang:store.get(K + "-lang","py"), untimed:store.get(K + "-untimed", false) };
+// A question removed from the bank since this session was saved (e.g. an old version replaced by a new one) is dropped from it
+if (S.exam && (S.exam.ids || []).some(id => !QMAP[id])){
+  S.exam.ids = (S.exam.ids || []).filter(id => QMAP[id]);
+  if (!S.exam.ids.length) S.exam = null; else S.exam.cur = Math.min(S.exam.cur || 0, S.exam.ids.length - 1);
+  store.set(K + "-exam", S.exam);
+}
 if (S.exam && !S.exam.ended) S.view = "exam"; else if (S.exam && S.exam.ended && S.exam.showReport) S.view = "report";
 const saveExam = () => store.set(K + "-exam", S.exam);

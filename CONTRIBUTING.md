@@ -47,7 +47,7 @@ SQL, debugging and situational-judgement questions (`"type": "sql"`, `"debug"`, 
 **Repository questions** (`"type": "repo"`, like HackerRank's Code Repository / Amazon's AI-assisted repo task) are a folder, not a pasted JSON:
 
 ```
-data/<company>/questions/<id>.json          title, body (the question description), "diff": "Repo", "stacks": ["django"]
+data/<company>/questions/<id>.json          title, body (the question description), "diff": "Repo", "stacks": ["node", "django", "spring"]
 data/<company>/repos/<id>/<stack>/
   repo/        the project as the candidate gets it: with the bugs, a README.md and the visible tests
   solution/    the fixed versions of the files that have bugs
@@ -56,7 +56,7 @@ data/<company>/repos/<id>/<stack>/
                title and "hidden"), "bugs" ({"file", "test", "why", "fix", "edits": [{"fixed", "buggy"}]} in file order)
 ```
 
-Set up the stack's environment once (`python3 tools/setup_env.py django`, or from the app), then `python3 tools/add_question.py --check data/<company>/questions/<id>.json`: the fixed repository must pass every test, the starting one must fail a visible test, and each bug put back on its own must fail a test. Environments are defined in `app/envs/<stack>/` (pinned packages, a test runner that writes a JUnit report).
+Set up the stack's environment once (`python3 tools/setup_env.py node|django|spring`, or from the app), then `python3 tools/add_question.py --check data/<company>/questions/<id>.json`: the fixed repository must pass every test, the starting one must fail a visible test, and each bug put back on its own must fail a test. Environments are defined in `app/envs/<stack>/` (pinned packages; Django's test runner and Node's Jest reporter write a JUnit report, Spring uses Maven Surefire's). A Node repository's `package.json` and a Spring repository's `pom.xml` must use the environment's dependencies (`app/envs/node/package.json`, `app/envs/spring/template/pom.xml`), because the tests run against those.
 
 Older questions keep their function specs in `tools/style/specs.py`. New ones carry `spec` in their own JSON.
 

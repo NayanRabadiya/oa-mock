@@ -4,7 +4,7 @@ Transcribed from 32 phone photos of the test IDE (`PDF Gallery_20260906_153302.p
 The photos are blurry in places. Text marked *[unclear]* couldn't be read, and lines cut off at the screen edge are marked `…`.
 The API is also in machine-readable form in [`moviedb-watchlist-api.json`](moviedb-watchlist-api.json).
 
-→ Mock question: `data/amazon/questions/watchlist.json`, built from `tools/amazon/watchlist/`.
+→ Mock question: `data/amazon/questions/watchlist-repo.json`, a real repository in Node.js (MERN), Django and Spring Boot under `data/amazon/repos/watchlist-repo/`. (An earlier in-browser JavaScript version, `tools/amazon/watchlist/`, was retired on 15 Nov 2026; it is in the git history.)
 
 ---
 
