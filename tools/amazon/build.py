@@ -23,6 +23,7 @@ post = open(H('watchlist', 'post.js')).read()
 starter = open(H('watchlist', 'starter.js')).read()
 fixed = open(H('watchlist', 'fixed.js')).read()
 wt = json.load(open(H('build', 'watchlist_tests.json')))
+bugs = json.load(open(H('watchlist', 'bugs.json')))      # each bug as edits that put it back into fixed.js (checked by tools/add_question.py)
 
 M = lambda i: "65f0a1b2c3d4e5f6%08d" % i
 movies = ["The Shawshank Redemption", "Interstellar", "The Dark Knight", "Spirited Away", "Parasite", "Inception"]
@@ -72,7 +73,7 @@ watchlist = {
     "out": "One line per request: <code>&lt;status&gt; &lt;JSON body&gt;</code>, printed by the test client.",
     "cons": ["Edit only the three files in the editor; the framework, models, auth and test client are fixed", "Language: JavaScript (the real repo is Node + Express + MongoDB)", "The tests run against an in-memory database seeded fresh on every run"],
     "samples": wt["samples"], "hidden": wt["hidden"],
-    "starter": starter, "pre": pre, "post": post, "ref": fixed, "fixnotes": fixnotes,
+    "starter": starter, "pre": pre, "post": post, "ref": fixed, "fixnotes": fixnotes, "bugs": bugs,
     "lc": None, "lcurl": None,
 }
 

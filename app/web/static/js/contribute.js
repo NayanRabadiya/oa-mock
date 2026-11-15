@@ -58,12 +58,13 @@
         '<span class="nm">' + esc(c.name) + '</span><span class="first">' + esc(lines[0]) + "</span></summary>" +
         (c.detail ? "<pre>" + esc(c.detail) + "</pre>" : "") + "</details>";
     }).join("");
-    const st = (res.question || {}).stub;
+    const q = res.question || {};
+    const st = q.type === "debug" && q.starter ? { starter: q.starter } : q.stub;
     $("preview").hidden = !st;
     if (st) {
       const langs = Object.keys(st);
       $("ptabs").innerHTML = '<span class="ptab-lbl">What solvers see</span>' +
-        langs.map((l, i) => '<button data-l="' + l + '"' + (i ? "" : ' class="on"') + ">" + LANG[l] + "</button>").join("");
+        langs.map((l, i) => '<button data-l="' + l + '"' + (i ? "" : ' class="on"') + ">" + (LANG[l] || "Starting files (JavaScript)") + "</button>").join("");
       $("pcode").textContent = st[langs[0]];
       $("ptabs").querySelectorAll("button").forEach((b) => (b.onclick = () => {
         $("ptabs").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); $("pcode").textContent = st[b.dataset.l];
@@ -84,7 +85,11 @@
       $("results").innerHTML = '<details class="res fail" open><summary><span class=ic>✗</span><span class="nm">Read the JSON</span><span class="first">' + esc(e.message) + "</span></summary></details>";
       return;
     }
-    $("results").innerHTML = '<div class="running-line"><span class="spin"></span>Running the checks: format, function spec, references, drivers in 4 languages, wrong answers, duplicates…</div>';
+    const what = { sql: "format, the reference query on every test, wrong queries, duplicates",
+      debug: "format, the fixed and starting files on every test, each listed bug, duplicates",
+      sjt: "format, the scenarios and their scores, duplicates" }[q.type] ||
+      "format, function spec, references, drivers in 4 languages, wrong answers, duplicates";
+    $("results").innerHTML = '<div class="running-line"><span class="spin"></span>Running the checks: ' + esc(what) + "…</div>";
     $("summary").textContent = ""; $("save").disabled = true; $("run").disabled = true;
     last = { company: company(), question: q };
     api("/api/contribute/check", last).then(showResults)

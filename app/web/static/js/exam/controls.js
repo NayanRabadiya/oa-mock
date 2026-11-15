@@ -63,6 +63,10 @@ async function doRun(full){
   if (langMissing(lang)){ $("#out").innerHTML = missingHelp(lang); if (UI.min) setConsole(false); setStat(LANGS[lang].label + " isn't installed", "bad"); return; }
   const code = srcOf(q, codeOf(id, lang), lang);
   const out = $("#out"), runB = $("#run"), subB = $("#submit");
+  if (q.type === "sql" && !code.replace(/--[^\n]*|\/\*[\s\S]*?\*\//g, "").replace(/;/g, "").trim()){   // only comments or nothing
+    out.innerHTML = `<div class="verdict warn">Write a query first</div><p class="muted">Type a SELECT query in the editor, then run it on the sample data.</p>`;
+    if (UI.min) setConsole(false); setStat("Write a query first", "bad"); return;
+  }
   busy = true; runB.disabled = subB.disabled = true;
   if (UI.min) setConsole(false);
   setStat(full ? "Submitting…" : "Running…", "");

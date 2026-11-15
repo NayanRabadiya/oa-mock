@@ -263,6 +263,7 @@ tools/
   check_refs.py            runs every reference solution against its tests
   check_dupes.py           finds questions already in the bank (text overlap; --deep compares answers)
   add_question.py          the question checks (same as the app and the pull-request check); --save adds it
+  js_check.js              runs SQL (AlaSQL) and JavaScript with the page's own code, for the SQL and debugging checks
   build_catalog.py         rewrites data/catalog.json (pull requests include it; the PR check verifies it)
   smoke.py                 starts the app, loads its pages and grades an answer (pull-request check)
   check_contrast.py        checks every text/background pair in tokens.css meets WCAG contrast, light and dark
@@ -287,6 +288,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). In short: open **add a question** in the
 
 ## Contributing
 
-Sat an OA recently? Add it. Open **add a question** in the app, give the prompt there to your LLM along with your notes, and paste back what it writes. The app checks the question (references, drivers in 4 languages, known-wrong solutions, duplicates) and opens the pull request for you. [CONTRIBUTING.md](CONTRIBUTING.md) has the details. The more people add, the more useful this is for everyone.
+Sat an OA recently? Add it. Open **add a question** in the app, give the prompt there to your LLM along with your notes, and paste back what it writes. The app checks the question (references, drivers in 4 languages, known-wrong solutions, duplicates; for SQL, debugging and SJT questions their own checks) and opens the pull request for you. [CONTRIBUTING.md](CONTRIBUTING.md) has the details. The more people add, the more useful this is for everyone.
 
 The questions are paraphrased from candidates' reports and are for personal practice only.

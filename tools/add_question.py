@@ -9,9 +9,16 @@ pull-request check.
     python3 tools/add_question.py --check data/<company>/questions/<id>.json [...]   # re-check questions in the bank
     python3 tools/add_question.py --changed origin/main       # every question changed since a git ref (used by CI)
 
-Checks: format; the function "spec" (generates the LeetCode stub and the hidden input/output driver in Python, C++,
-Java and JavaScript); the references pass every test; the 4 drivers read every input the same way; tests catch
-the known-wrong solutions in "wrong"; not already in the bank. Exit code 1 if any check fails.
+Checks, by "type" (see app/server/contribute.py):
+  coding (default)  format; the function "spec" (generates the LeetCode stub and the hidden input/output driver in
+                    Python, C++, Java and JavaScript); the references pass every test; the 4 drivers read every input
+                    the same way; tests catch the known-wrong solutions in "wrong"
+  sql               format and tables match "schema"; the reference query gives the expected rows on every test in
+                    AlaSQL (the page's engine); the known-wrong queries in "wrong" fail a test
+  debug             the fixed files ("ref") pass every test; the buggy files ("starter") fail one; each bug in "bugs",
+                    put back into the fixed files on its own, fails a test
+  sjt               every scenario has 3-6 options, each scored 0/1/2, exactly one best answer, and a reason
+and for every type: not already in the bank. SQL and debugging need Node.js (node). Exit code 1 if any check fails.
 """
 import json, os, subprocess, sys
 
@@ -55,8 +62,6 @@ def main(argv):
             print("no question files to check"); return 0
         for p in paths:
             company, q = from_bank(p)
-            if q.get("type", "code") != "code":
-                print("\n== %s/%s: %s question, checked by hand" % (company, q.get("id"), q.get("type"))); continue
             ok &= report("%s/%s" % (company, q.get("id")), contribute.check(company, q, replace=True))
         return 0 if ok else 1
     company, path = argv[0], argv[1]

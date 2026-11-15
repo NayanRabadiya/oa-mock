@@ -63,6 +63,97 @@
  "post": "\n// ---- file: app.js + test client (read-only) -----------------------------\nreturn (async () => {\n  const realNow = Date.now;\n  let clock = 1767225600000;            // 2026-01-01T00:00:00Z\n  Date.now = () => clock;\n  const router = (typeof watchlistRouter !== \"undefined\") ? watchlistRouter : null;\n  if (!router) { __out.push(\"watchlistRouter is not defined\"); return; }\n  const matchPath = (pat, path) => {\n    const a = pat.replace(/\\/+$/, \"\").split(\"/\"), b = path.replace(/\\/+$/, \"\").split(\"/\");\n    if (a.length !== b.length) return null;\n    const params = {};\n    for (let i = 0; i < a.length; i++) {\n      if (a[i].startsWith(\":\")) params[a[i].slice(1)] = decodeURIComponent(b[i]);\n      else if (a[i] !== b[i]) return null;\n    }\n    return params;\n  };\n  const show = body => {\n    if (Array.isArray(body)) return JSON.stringify(body.map(x => x && typeof x === \"object\" && typeof x.title === \"string\" ? x.title : x));\n    return JSON.stringify(body === undefined ? null : body);\n  };\n  async function request(method, url, user, body) {\n    const sub = url.replace(/^\\/api\\/watchlist/, \"\") || \"/\";\n    const req = { method, path: sub, originalUrl: url, params: {}, body: body || {}, headers: user === \"-\" ? {} : { authorization: \"Bearer token-\" + user } };\n    let sent = null;\n    const res = {\n      statusCode: 200,\n      status(c) { this.statusCode = c; return this; },\n      json(b) { if (sent) { __log(\"Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client\"); return this; } sent = { code: this.statusCode, body: b }; return this; },\n      send(b) { return this.json(b); }\n    };\n    const layers = router.stack.filter(l => l.all || (l.method === method && matchPath(l.path, sub)));\n    const chain = [];\n    for (const l of layers) { if (!l.all) req.params = matchPath(l.path, sub); for (const h of l.h) chain.push(h); }\n    const routed = layers.some(l => !l.all);\n    const run = async i => {\n      if (sent) return;\n      if (i >= chain.length) { if (!routed) res.status(404).json({ message: \"Cannot \" + method + \" \" + url }); return; }\n      let p;\n      try { p = chain[i](req, res, () => run(i + 1)); if (p && typeof p.then === \"function\") await p; }\n      catch (e) { __log(e); if (!sent) res.status(500).json({ message: \"Internal Server Error\" }); }\n    };\n    await run(0);\n    for (let k = 0; k < 5 && !sent; k++) await new Promise(r => setTimeout(r, 0));\n    return sent || { code: 504, body: { message: \"No response: the request never finished (it would time out)\" } };\n  }\n  try {\n  const lines = require(\"fs\").readFileSync().split(\"\\n\").map(l => l.trim()).filter(l => l && !l.startsWith(\"#\"));\n  for (const line of lines) {\n    const m = line.match(/^(\\d+)\\s+(\\S+)\\s+(GET|POST)\\s+(\\S+)\\s*(.*)$/);\n    if (!m) { __out.push(\"bad test line: \" + line); continue; }\n    clock = 1767225600000 + Number(m[1]) * 1000;\n    let body = {};\n    if (m[5]) body = JSON.parse(m[5]);\n    const r = await request(m[3], m[4], m[2], body);\n    __out.push(r.code + \" \" + show(r.body));\n  }\n  } finally { Date.now = realNow; }\n  process.stdout.write(__out.join(\"\\n\") + \"\\n\");\n})();\n",
  "ref": "// ---- file: controllers/watchlistController.js ---------------------------\nconst getWatchlist = async (req, res) => {\n  try {\n    const userId = req.userId;\n\n    const watchlistItems = await Watchlist.find({ user: userId }).populate('movie');\n\n    const movies = watchlistItems\n      .filter((item) => item.movie)\n      .map((item) => item.movie);\n\n    res.json(movies);\n  } catch (error) {\n    console.error('Get watchlist error:', error);\n    res.status(500).json({ message: 'Server error' });\n  }\n};\n\nconst addToWatchlist = async (req, res) => {\n  try {\n    const userId = req.userId;\n    const { movieId } = req.body;\n\n    if (!movieId) {\n      return res.status(400).json({ message: 'Movie ID is required' });\n    }\n\n    if (!mongoose.Types.ObjectId.isValid(movieId)) {\n      return res.status(400).json({ message: 'Invalid movie ID format' });\n    }\n\n    const movie = await Movie.findById(movieId);\n    if (!movie) {\n      return res.status(404).json({ message: 'Movie not found' });\n    }\n\n    const existing = await Watchlist.findOne({ user: userId, movie: movieId });\n    if (existing) {\n      return res.status(400).json({ message: 'Movie already in watchlist' });\n    }\n\n    await Watchlist.create({ user: userId, movie: movieId });\n\n    res.status(201).json({ message: 'Movie added to watchlist successfully' });\n  } catch (error) {\n    console.error('Add to watchlist error:', error);\n\n    // Handle duplicate key error (though we check above, this is a safety net)\n    if (error.code === 11000) {\n      return res.status(400).json({ message: 'Movie already in watchlist' });\n    }\n\n    res.status(500).json({ message: 'Server error' });\n  }\n};\n\nconst removeFromWatchlist = async (req, res) => {\n  try {\n    const userId = req.userId;\n    const { movieId } = req.body;\n\n    if (!movieId) {\n      return res.status(400).json({ message: 'Movie ID is required' });\n    }\n\n    if (!mongoose.Types.ObjectId.isValid(movieId)) {\n      return res.status(400).json({ message: 'Invalid movie ID format' });\n    }\n\n    const deleted = await Watchlist.findOneAndDelete({ user: userId, movie: movieId });\n    if (!deleted) {\n      return res.status(404).json({ message: 'Movie not found in watchlist' });\n    }\n\n    res.json({ message: 'Movie removed from watchlist successfully' });\n  } catch (error) {\n    console.error('Remove from watchlist error:', error);\n    res.status(500).json({ message: 'Server error' });\n  }\n};\n\nconst checkWatchlistStatus = async (req, res) => {\n  try {\n    const userId = req.userId;\n    const { movieId } = req.params;\n\n    if (!mongoose.Types.ObjectId.isValid(movieId)) {\n      return res.status(400).json({ message: 'Invalid movie ID format' });\n    }\n\n    const entry = await Watchlist.findOne({ user: userId, movie: movieId });\n\n    res.json({ isInWatchlist: !!entry });\n  } catch (error) {\n    console.error('Check watchlist status error:', error);\n    res.status(500).json({ message: 'Server error' });\n  }\n};\n\n// ---- file: middleware/rateLimiter.js ------------------------------------\nconst rateLimitStore = new Map();\n\n// General-purpose limiter used by other routers (reviews, ratings)\nconst rateLimiter = (windowMs = 60 * 1000, max = 30) => {\n  return (req, res, next) => {\n    const userId = req.userId;\n\n    if (!userId) {\n      return res.status(401).json({ message: 'Unauthorized' });\n    }\n\n    const key = `${userId}-${req.path}`;\n    const now = Date.now();\n\n    if (!rateLimitStore.has(key)) {\n      rateLimitStore.set(key, []);\n    }\n\n    const userRequests = rateLimitStore.get(key);\n    const validRequests = userRequests.filter((timestamp) => now - timestamp < windowMs);\n\n    if (validRequests.length >= max) {\n      return res.status(429).json({\n        message: 'Too many requests. Please try again in 1 minute.'\n      });\n    }\n\n    validRequests.push(now);\n    rateLimitStore.set(key, validRequests);\n    next();\n  };\n};\n\n// Watchlist add/remove: 10 operations per user per 2 minutes, add and remove combined\nconst watchlistRateLimiter = () => {\n  return (req, res, next) => {\n    const userId = req.userId;\n\n    if (!userId) {\n      return res.status(401).json({ message: 'Unauthorized' });\n    }\n\n    const key = `${userId}-watchlist-operations`;\n    const now = Date.now();\n\n    if (!rateLimitStore.has(key)) {\n      rateLimitStore.set(key, []);\n    }\n\n    const windowMs = 2 * 60 * 1000;\n    const userRequests = rateLimitStore.get(key);\n    const validRequests = userRequests.filter(\n      (timestamp) => now - timestamp < windowMs\n    );\n\n    if (validRequests.length >= 10) {\n      return res.status(429).json({\n        message: 'Too many watchlist operations. You can add or remove movies up to 10 times within 2 minutes.'\n      });\n    }\n\n    validRequests.push(now);\n    rateLimitStore.set(key, validRequests);\n\n    next();\n  };\n};\n\n// ---- file: routes/watchlistRoutes.js ------------------------------------\nconst watchlistRouter = express.Router();\n\nwatchlistRouter.use(authMiddleware);\n\nwatchlistRouter.get('/', getWatchlist);\nwatchlistRouter.get('/check/:movieId', checkWatchlistStatus);\nwatchlistRouter.post('/add', watchlistRateLimiter(), addToWatchlist);\nwatchlistRouter.post('/remove', watchlistRateLimiter(), removeFromWatchlist);\n",
  "fixnotes": "<ul>\n<li><code>getWatchlist</code> called <code>Watchlist.findByUser</code>, which doesn't exist, so the list always failed with 500. Use <code>Watchlist.find({ user: userId }).populate('movie')</code> so the response contains movie documents, not ids.</li>\n<li><code>addToWatchlist</code> answered 201 but never called <code>Watchlist.create</code>. A duplicate must answer <b>400</b> Movie already in watchlist. Answering 404 here was a common mistake; the unique index's error code 11000 is a second safety net.</li>\n<li><code>removeFromWatchlist</code> never deleted anything and never answered 404. Use <code>findOneAndDelete</code> and check the result.</li>\n<li><code>checkWatchlistStatus</code> returned the array from <code>find</code>. It must return a boolean: <code>!!(await Watchlist.findOne(...))</code>.</li>\n<li><code>watchlistRateLimiter</code>: <code>windowMs</code> was never defined (ReferenceError, so 500). The filter kept the <i>expired</i> timestamps (<code>&gt;=</code> instead of <code>&lt;</code>). <code>if (requests)</code> is always true because an empty array is truthy. <code>validRequests</code> was never declared. It should be: keep timestamps with <code>now − t &lt; 2 min</code>, reject when 10 or more remain, otherwise push <code>now</code>.</li>\n<li>The routes never used the limiter. Wiring <code>watchlistRateLimiter</code> without calling it passes the factory as middleware, so the request hangs (the real test runner showed a 20 s timeout). Use <code>watchlistRateLimiter()</code>. The generic <code>rateLimiter</code> keys by path, so it would count adds and removes separately; it isn't the right tool here.</li>\n</ul>",
+ "bugs": [
+  {
+   "why": "getWatchlist calls Watchlist.findByUser, which doesn't exist (and the list must hold movie documents)",
+   "edits": [
+    {
+     "fixed": "await Watchlist.find({ user: userId }).populate('movie');",
+     "buggy": "await Watchlist.findByUser(userId);"
+    }
+   ]
+  },
+  {
+   "why": "addToWatchlist answers 201 without saving anything: no duplicate check, no Watchlist.create",
+   "edits": [
+    {
+     "fixed": "    const existing = await Watchlist.findOne({ user: userId, movie: movieId });\n    if (existing) {\n      return res.status(400).json({ message: 'Movie already in watchlist' });\n    }\n\n    await Watchlist.create({ user: userId, movie: movieId });\n\n",
+     "buggy": ""
+    }
+   ]
+  },
+  {
+   "why": "removeFromWatchlist never deletes the entry and never answers 404",
+   "edits": [
+    {
+     "fixed": "    const deleted = await Watchlist.findOneAndDelete({ user: userId, movie: movieId });\n    if (!deleted) {\n      return res.status(404).json({ message: 'Movie not found in watchlist' });\n    }\n\n",
+     "buggy": ""
+    }
+   ]
+  },
+  {
+   "why": "checkWatchlistStatus returns the array from find() instead of a boolean",
+   "edits": [
+    {
+     "fixed": "    const entry = await Watchlist.findOne({ user: userId, movie: movieId });",
+     "buggy": "    const isInWatchlist = await Watchlist.find({ user: userId, movie: movieId });"
+    },
+    {
+     "fixed": "res.json({ isInWatchlist: !!entry });",
+     "buggy": "res.json({ isInWatchlist });"
+    }
+   ]
+  },
+  {
+   "why": "watchlistRateLimiter: validRequests is never declared (the filter result is called requests)",
+   "edits": [
+    {
+     "fixed": "    const windowMs = 2 * 60 * 1000;\n    const userRequests = rateLimitStore.get(key);\n    const validRequests = userRequests.filter(",
+     "buggy": "    const windowMs = 2 * 60 * 1000;\n    const userRequests = rateLimitStore.get(key);\n    const requests = userRequests.filter("
+    }
+   ]
+  },
+  {
+   "why": "watchlistRateLimiter: windowMs is never defined",
+   "edits": [
+    {
+     "fixed": "    const windowMs = 2 * 60 * 1000;\n",
+     "buggy": ""
+    }
+   ]
+  },
+  {
+   "why": "watchlistRateLimiter: the filter keeps the expired timestamps (>= instead of <)",
+   "edits": [
+    {
+     "fixed": "      (timestamp) => now - timestamp < windowMs\n    );\n\n    if (validRequests.length >= 10)",
+     "buggy": "      (timestamp) => now - timestamp >= windowMs\n    );\n\n    if (validRequests.length >= 10)"
+    }
+   ]
+  },
+  {
+   "why": "watchlistRateLimiter: if (requests) is always true, because an empty array is truthy",
+   "edits": [
+    {
+     "fixed": "if (validRequests.length >= 10) {",
+     "buggy": "if (requests) {"
+    }
+   ]
+  },
+  {
+   "why": "the routes never use the rate limiter for add and remove",
+   "edits": [
+    {
+     "fixed": "watchlistRouter.post('/add', watchlistRateLimiter(), addToWatchlist);",
+     "buggy": "watchlistRouter.post('/add', addToWatchlist);"
+    },
+    {
+     "fixed": "watchlistRouter.post('/remove', watchlistRateLimiter(), removeFromWatchlist);",
+     "buggy": "watchlistRouter.post('/remove', removeFromWatchlist);"
+    }
+   ]
+  }
+ ],
  "lc": null,
  "lcurl": null,
  "year": 2026,
