@@ -335,6 +335,8 @@ def _graded(m, results, output, timed_out, scope, reveal_hidden):
             hidden_n += 1
             row["title"] = t["title"] if reveal_hidden else "Hidden test %d" % hidden_n
             row["name"] = t["id"].rsplit(".", 1)[-1] if reveal_hidden else ""
+            if not reveal_hidden:
+                row["id"] = "hidden_%d" % hidden_n
         else:
             row["title"] = t["title"]
             row["name"] = t["id"].rsplit(".", 1)[-1]

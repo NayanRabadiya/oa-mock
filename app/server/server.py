@@ -25,6 +25,10 @@ POST /api/repos/<co>/<qid>/<stack>/file        {path, text} saves it
 POST /api/repos/<co>/<qid>/<stack>/reset       {path?} one file or the whole repo back to the start
 POST /api/repos/<co>/<qid>/<stack>/run         {scope: visible|all, reveal} runs the tests
 GET  /api/repos/<co>/<qid>/<stack>/solution    the fixed files and what was broken (for the report)
+POST /api/repos/<co>/<qid>/<stack>/hints       {failing: [test ids]} the hint ladder for those tests
+POST /api/repos/<co>/<qid>/<stack>/chat        {messages, mode, file, results} one reply from the AI assistant
+GET  /api/assist                     AI providers, models, which have a key (never the keys themselves)
+POST /api/assist                     {action: configure|models, provider, key?, model?, url?}
 POST /run                            {lang, code, inputs[], limit} -> {results[]} or {compile_error}
 GET  /api/submissions?company=&qid=  past submissions, newest first (see submissions.py)
 GET  /api/submissions/<company>/<qid>/<id>    one submission with its code
@@ -37,7 +41,7 @@ import html, json, mimetypes, os, secrets
 from urllib.parse import parse_qs, urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import contribute, data, envs, grading, judge, library, repos, submissions, toolchain
+from . import assist, contribute, data, envs, grading, judge, library, repos, submissions, toolchain
 
 WEB_DIR = os.path.join(data.ROOT, "app", "web")
 STATIC_DIR = os.path.join(WEB_DIR, "static")
@@ -121,6 +125,13 @@ class Handler(BaseHTTPRequestHandler):
         if not self._token_ok():
             return self._json(403, {"error": "forbidden"})
         try:
+            if parts == ["assist"]:
+                if method == "GET":
+                    return self._json(200, assist.providers())
+                req = self._body()
+                if req.get("action") == "models":
+                    return self._json(200, assist.models(req.get("provider")))
+                return self._json(200, assist.configure(req))
             if parts == ["envs"]:
                 if method == "GET":
                     return self._json(200, envs.status())
@@ -144,10 +155,14 @@ class Handler(BaseHTTPRequestHandler):
                         return self._json(200, repos.write(co, qid, stack, req.get("path"), req.get("text"), ws))
                     if action == "reset":
                         return self._json(200, repos.reset(co, qid, stack, req.get("path"), ws))
+                    if action == "hints":
+                        return self._json(200, assist.hints(co, qid, stack, [str(x) for x in req.get("failing") or []]))
+                    if action == "chat":
+                        return self._json(200, assist.chat(co, qid, stack, ws, req))
                     if action == "run":
                         return self._json(200, repos.run(co, qid, stack, "all" if req.get("scope") == "all" else "visible",
                                                          bool(req.get("reveal")), ws))
-        except (repos.RepoError, submissions.BadRequest, ValueError) as e:
+        except (repos.RepoError, assist.AssistError, submissions.BadRequest, ValueError) as e:
             return self._json(400, {"error": str(e)})
         except OSError as e:
             return self._json(500, {"error": str(e)})
@@ -162,7 +177,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if parts[:2] == ["api", "submissions"]:
             return self._submissions("GET", parts[2:], url.query)
-        if parts[:2] in (["api", "envs"], ["api", "repos"]):
+        if parts[:2] in (["api", "envs"], ["api", "repos"], ["api", "assist"]):
             return self._repos("GET", parts[1:], url.query)
 
         if not parts:
@@ -246,7 +261,7 @@ class Handler(BaseHTTPRequestHandler):
         if urlsplit(self.path).path == "/api/submissions":
             return self._submissions("POST", [], "")
         rp = [p for p in urlsplit(self.path).path.split("/") if p]
-        if rp[:2] in (["api", "envs"], ["api", "repos"]):
+        if rp[:2] in (["api", "envs"], ["api", "repos"], ["api", "assist"]):
             return self._repos("POST", rp[1:], urlsplit(self.path).query)
         if urlsplit(self.path).path.startswith("/api/contribute/"):
             if not self._token_ok():
