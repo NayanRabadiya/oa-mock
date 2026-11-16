@@ -1,0 +1,109 @@
+{
+ "stack": "spring",
+ "name": "Wallet API (Spring Boot)",
+ "readonly": [
+  "README.md",
+  "pom.xml",
+  "src/test/*"
+ ],
+ "open": [
+  "src/main/java/com/wallet/controller/TransferController.java"
+ ],
+ "tests": [
+  {
+   "id": "com.wallet.WalletTests.aDepositAddsToTheBalance",
+   "title": "A deposit adds to the balance",
+   "hidden": false
+  },
+  {
+   "id": "com.wallet.WalletTests.aTransferMovesMoneyBetweenWallets",
+   "title": "A transfer moves money between wallets",
+   "hidden": false
+  },
+  {
+   "id": "com.wallet.WalletTests.aFailedTransferChangesNothing",
+   "title": "A failed transfer changes nothing",
+   "hidden": false
+  },
+  {
+   "id": "com.wallet.WalletTests.listsAWalletsTransactionsNewestFirst",
+   "title": "Lists a wallet's transactions, newest first",
+   "hidden": false
+  },
+  {
+   "id": "com.wallet.WalletTests.filtersTransactionsByType",
+   "title": "Filters transactions by type",
+   "hidden": false
+  },
+  {
+   "id": "com.wallet.MoreWalletTests.validatesAmountsAndWallets",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "com.wallet.MoreWalletTests.cannotSpendMoreThanTheBalance",
+   "title": "Can't spend more than the balance",
+   "hidden": true
+  },
+  {
+   "id": "com.wallet.MoreWalletTests.frozenWalletsCannotSendOrReceive",
+   "title": "Frozen wallets can't send or receive",
+   "hidden": true
+  },
+  {
+   "id": "com.wallet.MoreWalletTests.limitCapsTheTransactionList",
+   "title": "limit caps the transaction list",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "src/main/java/com/wallet/controller/TransferController.java",
+   "test": "aTransferMovesMoneyBetweenWallets",
+   "why": "the transfer endpoint is mapped to /api/transfer, so POST /api/transfers gets a 404",
+   "fix": "The path is /transfers (plural), as in the README: @PostMapping(\"/transfers\").",
+   "edits": [
+    {
+     "fixed": "    @PostMapping(\"/transfers\")",
+     "buggy": "    @PostMapping(\"/transfer\")"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/wallet/controller/WalletController.java",
+   "test": "listsAWalletsTransactionsNewestFirst",
+   "why": "the transactions endpoint binds @PathVariable(\"walletId\"), but the path variable is {id}, so every request fails with a server error",
+   "fix": "Bind the variable the path declares: @PathVariable(\"id\").",
+   "edits": [
+    {
+     "fixed": "            @PathVariable(\"id\") String id,",
+     "buggy": "            @PathVariable(\"walletId\") String id,"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/wallet/controller/WalletController.java",
+   "test": "filtersTransactionsByType",
+   "why": "the endpoint reads the filter from ?kind= instead of ?type=, so the type filter is ignored",
+   "fix": "Bind @RequestParam(name = \"type\", ...).",
+   "edits": [
+    {
+     "fixed": "            @RequestParam(name = \"type\", required = false) String type,",
+     "buggy": "            @RequestParam(name = \"kind\", required = false) String type,"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/wallet/service/TransferService.java",
+   "test": "aFailedTransferChangesNothing",
+   "why": "a transfer takes the money out of the sender before checking the recipient, so a transfer to a missing or frozen wallet loses the money",
+   "fix": "Look up and check both wallets (and the balance) before recording either side.",
+   "edits": [
+    {
+     "fixed": "        Wallet from = wallets.walletOrFail(fromId);\n        Wallet to = wallets.walletOrFail(toId);\n        wallets.activeOrFail(from);\n        wallets.activeOrFail(to);\n        if (from.balance() < amount) {\n            throw new WalletException(409, \"Insufficient funds\");\n        }\n\n        store.record(from.id(), \"transfer_out\", amount, at, to.id());\n        store.record(to.id(), \"transfer_in\", amount, at, from.id());",
+     "buggy": "        Wallet from = wallets.walletOrFail(fromId);\n        wallets.activeOrFail(from);\n        if (from.balance() < amount) {\n            throw new WalletException(409, \"Insufficient funds\");\n        }\n        store.record(from.id(), \"transfer_out\", amount, at, toId);\n\n        Wallet to = wallets.walletOrFail(toId);\n        wallets.activeOrFail(to);\n        store.record(to.id(), \"transfer_in\", amount, at, from.id());"
+    }
+   ]
+  }
+ ]
+}

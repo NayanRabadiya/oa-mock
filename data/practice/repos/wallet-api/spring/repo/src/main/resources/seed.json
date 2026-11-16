@@ -1,0 +1,11 @@
+{
+  "wallets": [
+    {"id": "W1", "owner": "Asha", "balance": 5000, "status": "active"},
+    {"id": "W2", "owner": "Bilal", "balance": 1200, "status": "active"},
+    {"id": "W3", "owner": "Chen", "balance": 300, "status": "frozen"}
+  ],
+  "transactions": [
+    {"id": "TX1", "walletId": "W1", "type": "deposit", "amount": 5000, "balanceAfter": 5000, "counterparty": null, "at": "2026-11-14T09:00:00Z"},
+    {"id": "TX2", "walletId": "W2", "type": "deposit", "amount": 1200, "balanceAfter": 1200, "counterparty": null, "at": "2026-11-14T10:00:00Z"}
+  ]
+}

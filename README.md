@@ -197,6 +197,7 @@ Questions written for this mock rather than reported from an OA, kept apart from
 |---|---|
 | **Library Loans** (warm-up) | borrow and return books, late fees · 2 bugs, 4 + 3 tests |
 | **Support Desk** | ticket queue by priority, agent limits, a status workflow, SLA deadlines · 4 bugs, 5 + 4 tests |
+| **Wallet API** | deposits, withdrawals, all-or-nothing transfers, transaction history; bugs in paths and parameter names · 4 bugs, 5 + 4 tests |
 
 Each one comes in Node.js, Django and Spring Boot. Formats: **Repository warm-up** (30 min), **Repository task** (60 min), Custom.
 

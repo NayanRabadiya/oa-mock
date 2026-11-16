@@ -137,7 +137,7 @@
    "key": "practice",
    "name": "Practice Set",
    "tagline": "Our own questions, written for this mock: repository tasks and warm-ups",
-   "questions": 2,
+   "questions": 3,
    "years": [
     2026
    ],
@@ -147,8 +147,8 @@
     "Repository warm-up",
     "Repository task"
    ],
-   "bytes": 153708,
-   "download": 81000,
+   "bytes": 247230,
+   "download": 126000,
    "own": true
   }
  ]

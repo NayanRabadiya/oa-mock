@@ -8,7 +8,8 @@
   "defaultFmt": "warmup",
   "custom": [
     "library-loans",
-    "support-desk"
+    "support-desk",
+    "wallet-api"
   ],
   "formats": {
     "warmup": {
@@ -23,11 +24,12 @@
     },
     "repo": {
       "name": "Repository task",
-      "desc": "One full practice repository (Support Desk: 4 bugs) · 60 min",
+      "desc": "One full practice repository (Support Desk or Wallet API, 4 bugs each) · 60 min",
       "mins": 60,
       "pools": [
         [
-          "support-desk"
+          "support-desk",
+          "wallet-api"
         ]
       ]
     },
@@ -41,6 +43,7 @@
   "offlist": [],
   "order": [
     "library-loans",
-    "support-desk"
+    "support-desk",
+    "wallet-api"
   ]
 }

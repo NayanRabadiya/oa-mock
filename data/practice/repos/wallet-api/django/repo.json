@@ -1,0 +1,110 @@
+{
+ "stack": "django",
+ "name": "Wallet API (Django)",
+ "readonly": [
+  "README.md",
+  "requirements.txt",
+  "manage.py",
+  "wallets/tests/*"
+ ],
+ "open": [
+  "wallets/urls.py"
+ ],
+ "tests": [
+  {
+   "id": "wallets.tests.test_wallet.WalletTests.test_a_deposit_adds_to_the_balance",
+   "title": "A deposit adds to the balance",
+   "hidden": false
+  },
+  {
+   "id": "wallets.tests.test_wallet.WalletTests.test_a_transfer_moves_money_between_wallets",
+   "title": "A transfer moves money between wallets",
+   "hidden": false
+  },
+  {
+   "id": "wallets.tests.test_wallet.WalletTests.test_a_failed_transfer_changes_nothing",
+   "title": "A failed transfer changes nothing",
+   "hidden": false
+  },
+  {
+   "id": "wallets.tests.test_wallet.WalletTests.test_lists_a_wallets_transactions_newest_first",
+   "title": "Lists a wallet's transactions, newest first",
+   "hidden": false
+  },
+  {
+   "id": "wallets.tests.test_wallet.WalletTests.test_filters_transactions_by_type",
+   "title": "Filters transactions by type",
+   "hidden": false
+  },
+  {
+   "id": "wallets.tests.test_more.MoreWalletTests.test_validates_amounts_and_wallets",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "wallets.tests.test_more.MoreWalletTests.test_cannot_spend_more_than_the_balance",
+   "title": "Can't spend more than the balance",
+   "hidden": true
+  },
+  {
+   "id": "wallets.tests.test_more.MoreWalletTests.test_frozen_wallets_cannot_send_or_receive",
+   "title": "Frozen wallets can't send or receive",
+   "hidden": true
+  },
+  {
+   "id": "wallets.tests.test_more.MoreWalletTests.test_limit_caps_the_transaction_list",
+   "title": "limit caps the transaction list",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "wallets/services/transfers.py",
+   "test": "test_a_failed_transfer_changes_nothing",
+   "why": "a transfer takes the money out of the sender before checking the recipient, so a transfer to a missing or frozen wallet loses the money",
+   "fix": "Look up and check both wallets (and the balance) before recording either side.",
+   "edits": [
+    {
+     "fixed": "    source = wallet_or_fail(from_id)\n    target = wallet_or_fail(to_id)\n    active_or_fail(source)\n    active_or_fail(target)\n    if source[\"balance\"] < amount:\n        raise WalletError(409, \"Insufficient funds\")\n\n    store.record(source, \"transfer_out\", amount, at, target[\"id\"])\n    store.record(target, \"transfer_in\", amount, at, source[\"id\"])",
+     "buggy": "    source = wallet_or_fail(from_id)\n    active_or_fail(source)\n    if source[\"balance\"] < amount:\n        raise WalletError(409, \"Insufficient funds\")\n    store.record(source, \"transfer_out\", amount, at, to_id)\n\n    target = wallet_or_fail(to_id)\n    active_or_fail(target)\n    store.record(target, \"transfer_in\", amount, at, source[\"id\"])"
+    }
+   ]
+  },
+  {
+   "file": "wallets/urls.py",
+   "test": "test_a_transfer_moves_money_between_wallets",
+   "why": "the transfer URL is registered as transfer, so POST /api/transfers gets a 404",
+   "fix": "The path is transfers (plural), as in the README.",
+   "edits": [
+    {
+     "fixed": "    path(\"transfers\", views.create_transfer),",
+     "buggy": "    path(\"transfer\", views.create_transfer),"
+    }
+   ]
+  },
+  {
+   "file": "wallets/urls.py",
+   "test": "test_lists_a_wallets_transactions_newest_first",
+   "why": "the transactions URL captures <str:wallet>, but the view takes wallet_id, so every request fails before the view runs",
+   "fix": "Capture <str:wallet_id>, like the other wallet URLs.",
+   "edits": [
+    {
+     "fixed": "    path(\"wallets/<str:wallet_id>/transactions\", views.transactions),",
+     "buggy": "    path(\"wallets/<str:wallet>/transactions\", views.transactions),"
+    }
+   ]
+  },
+  {
+   "file": "wallets/views.py",
+   "test": "test_filters_transactions_by_type",
+   "why": "the view reads the filter from ?kind= instead of ?type=, so the type filter is ignored",
+   "fix": "Read request.query_params.get(\"type\").",
+   "edits": [
+    {
+     "fixed": "    kind = request.query_params.get(\"type\")",
+     "buggy": "    kind = request.query_params.get(\"kind\")"
+    }
+   ]
+  }
+ ]
+}
