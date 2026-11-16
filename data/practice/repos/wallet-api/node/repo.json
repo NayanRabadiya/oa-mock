@@ -1,0 +1,110 @@
+{
+ "stack": "node",
+ "name": "Wallet API (Node.js)",
+ "readonly": [
+  "README.md",
+  "package.json",
+  "jest.config.js",
+  "tests/*"
+ ],
+ "open": [
+  "routes/walletRoutes.js"
+ ],
+ "tests": [
+  {
+   "id": "WalletTests.a deposit adds to the balance",
+   "title": "A deposit adds to the balance",
+   "hidden": false
+  },
+  {
+   "id": "WalletTests.a transfer moves money between wallets",
+   "title": "A transfer moves money between wallets",
+   "hidden": false
+  },
+  {
+   "id": "WalletTests.a failed transfer changes nothing",
+   "title": "A failed transfer changes nothing",
+   "hidden": false
+  },
+  {
+   "id": "WalletTests.lists a wallet's transactions, newest first",
+   "title": "Lists a wallet's transactions, newest first",
+   "hidden": false
+  },
+  {
+   "id": "WalletTests.filters transactions by type",
+   "title": "Filters transactions by type",
+   "hidden": false
+  },
+  {
+   "id": "MoreWalletTests.validates amounts and wallets",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "MoreWalletTests.cannot spend more than the balance",
+   "title": "Can't spend more than the balance",
+   "hidden": true
+  },
+  {
+   "id": "MoreWalletTests.frozen wallets cannot send or receive",
+   "title": "Frozen wallets can't send or receive",
+   "hidden": true
+  },
+  {
+   "id": "MoreWalletTests.limit caps the transaction list",
+   "title": "limit caps the transaction list",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "controllers/walletController.js",
+   "test": "filters transactions by type",
+   "why": "the controller reads the filter from ?kind= instead of ?type=, so the type filter is ignored",
+   "fix": "Read req.query.type.",
+   "edits": [
+    {
+     "fixed": "  const type = req.query.type;",
+     "buggy": "  const type = req.query.kind;"
+    }
+   ]
+  },
+  {
+   "file": "routes/walletRoutes.js",
+   "test": "a transfer moves money between wallets",
+   "why": "the transfer route is registered as /transfer, so POST /api/transfers gets a 404",
+   "fix": "The path is /transfers (plural), as in the README.",
+   "edits": [
+    {
+     "fixed": "router.post('/transfers', c.createTransfer);",
+     "buggy": "router.post('/transfer', c.createTransfer);"
+    }
+   ]
+  },
+  {
+   "file": "routes/walletRoutes.js",
+   "test": "lists a wallet's transactions, newest first",
+   "why": "the transactions route names its path parameter :walletId, but the controller reads req.params.id, so it never finds the wallet",
+   "fix": "Name the parameter :id in the route, like the other wallet routes (or read the same name in the controller).",
+   "edits": [
+    {
+     "fixed": "router.get('/wallets/:id/transactions', c.listTransactions);",
+     "buggy": "router.get('/wallets/:walletId/transactions', c.listTransactions);"
+    }
+   ]
+  },
+  {
+   "file": "services/transferService.js",
+   "test": "a failed transfer changes nothing",
+   "why": "a transfer takes the money out of the sender before checking the recipient, so a transfer to a missing or frozen wallet loses the money",
+   "fix": "Look up and check both wallets (and the balance) before recording either side.",
+   "edits": [
+    {
+     "fixed": "  const from = walletOrFail(fromId);\n  const to = walletOrFail(toId);\n  activeOrFail(from);\n  activeOrFail(to);\n  if (from.balance < amount) throw new WalletError(409, 'Insufficient funds');\n\n  store.record(from, 'transfer_out', amount, at, to.id);\n  store.record(to, 'transfer_in', amount, at, from.id);",
+     "buggy": "  const from = walletOrFail(fromId);\n  activeOrFail(from);\n  if (from.balance < amount) throw new WalletError(409, 'Insufficient funds');\n  store.record(from, 'transfer_out', amount, at, toId);\n\n  const to = walletOrFail(toId);\n  activeOrFail(to);\n  store.record(to, 'transfer_in', amount, at, from.id);"
+    }
+   ]
+  }
+ ]
+}

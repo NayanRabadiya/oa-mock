@@ -1,0 +1,22 @@
+{
+ "id": "wallet-api",
+ "type": "repo",
+ "title": "Wallet API (repository)",
+ "diff": "Repo",
+ "src": "Written for this mock · repository task",
+ "body": "<p>You are given the repository of a <b>wallet API</b>: customers deposit, withdraw and transfer money between wallets, and every change is recorded in the wallet's transaction history.</p>\n<p><b>Issue:</b> after a refactor, the payments team reports that transfers can't be made at all, a wallet's history can't be opened, the history ignores its type filter, and a transfer to a wrong wallet number lost the customer's money. <b>4 integrated test cases</b> fail.</p>\n<p>Run the tests, read the failures, find the component each one points to, fix it, and run the tests again until they pass. Check paths and parameter names against the API table in <code>README.md</code>: some of these bugs are in how requests reach the code, not in the logic.</p>\n<p><b>Note:</b> the acceptance criteria are the predefined tests; more tests run when you submit.</p>\n<p class=\"muted\">Written for this mock (it isn't from a company OA), modelled on the wallet repositories candidates report, with wrong API paths and names.</p>",
+ "stacks": [
+  "node",
+  "django",
+  "spring"
+ ],
+ "year": 2026,
+ "inp": "",
+ "out": "",
+ "cons": [],
+ "samples": [],
+ "hidden": [],
+ "ref": "",
+ "lc": null,
+ "lcurl": null
+}
