@@ -1,0 +1,110 @@
+{
+ "stack": "django",
+ "name": "Support Desk API (Django)",
+ "readonly": [
+  "README.md",
+  "requirements.txt",
+  "manage.py",
+  "desk/tests/*"
+ ],
+ "open": [
+  "desk/services/tickets.py"
+ ],
+ "tests": [
+  {
+   "id": "desk.tests.test_tickets.TicketTests.test_creating_a_ticket_opens_it",
+   "title": "Creating a ticket opens it",
+   "hidden": false
+  },
+  {
+   "id": "desk.tests.test_tickets.TicketTests.test_tickets_are_listed_by_priority_oldest_first",
+   "title": "Tickets are listed by priority, oldest first",
+   "hidden": false
+  },
+  {
+   "id": "desk.tests.test_tickets.TicketTests.test_an_agent_cannot_take_more_tickets_than_their_limit",
+   "title": "An agent can't take more tickets than their limit",
+   "hidden": false
+  },
+  {
+   "id": "desk.tests.test_tickets.TicketTests.test_tickets_move_through_the_workflow_in_order",
+   "title": "Tickets move through the workflow in order",
+   "hidden": false
+  },
+  {
+   "id": "desk.tests.test_tickets.TicketTests.test_a_ticket_is_overdue_only_after_its_SLA",
+   "title": "A ticket is overdue only after its SLA",
+   "hidden": false
+  },
+  {
+   "id": "desk.tests.test_more.MoreTicketTests.test_validates_the_request",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "desk.tests.test_more.MoreTicketTests.test_filters_by_status_priority_and_assignee",
+   "title": "Filters by status, priority and assignee",
+   "hidden": true
+  },
+  {
+   "id": "desk.tests.test_more.MoreTicketTests.test_resolving_records_when_reopening_clears_it",
+   "title": "Resolving records when; reopening clears it",
+   "hidden": true
+  },
+  {
+   "id": "desk.tests.test_more.MoreTicketTests.test_finished_tickets_are_never_overdue_and_do_not_count_toward_an_agent_limit",
+   "title": "Finished tickets are never overdue and don't count toward a limit",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "desk/services/assignment.py",
+   "test": "test_an_agent_cannot_take_more_tickets_than_their_limit",
+   "why": "the workload counts only open tickets, so tickets already in progress don't count toward the agent's limit",
+   "fix": "Count every unfinished ticket assigned to the agent: status open or in_progress.",
+   "edits": [
+    {
+     "fixed": "ACTIVE = (\"open\", \"in_progress\")",
+     "buggy": "ACTIVE = (\"open\",)"
+    }
+   ]
+  },
+  {
+   "file": "desk/services/sla.py",
+   "test": "test_a_ticket_is_overdue_only_after_its_SLA",
+   "why": "the time open is worked out in minutes, not hours, so tickets look overdue far too early",
+   "fix": "Divide the seconds by SECONDS_PER_HOUR (60 * 60) to get hours.",
+   "edits": [
+    {
+     "fixed": "    return (parse(now) - parse(ticket[\"createdAt\"])).total_seconds() / SECONDS_PER_HOUR",
+     "buggy": "    return (parse(now) - parse(ticket[\"createdAt\"])).total_seconds() / 60"
+    }
+   ]
+  },
+  {
+   "file": "desk/services/tickets.py",
+   "test": "test_tickets_are_listed_by_priority_oldest_first",
+   "why": "tickets with the same priority are listed newest first; the queue must serve the oldest first",
+   "fix": "Sort by createdAt ascending (oldest first) as the tie-breaker after priority.",
+   "edits": [
+    {
+     "fixed": "    return (PRIORITIES.index(ticket[\"priority\"]), parse(ticket[\"createdAt\"]), int(ticket[\"id\"][1:]))",
+     "buggy": "    return (PRIORITIES.index(ticket[\"priority\"]), -parse(ticket[\"createdAt\"]).timestamp(), int(ticket[\"id\"][1:]))"
+    }
+   ]
+  },
+  {
+   "file": "desk/services/workflow.py",
+   "test": "test_tickets_move_through_the_workflow_in_order",
+   "why": "the workflow lets an in-progress ticket jump straight to closed, skipping resolved",
+   "fix": "From in_progress the only next status is resolved.",
+   "edits": [
+    {
+     "fixed": "    \"in_progress\": [\"resolved\"],",
+     "buggy": "    \"in_progress\": [\"resolved\", \"closed\"],"
+    }
+   ]
+  }
+ ]
+}

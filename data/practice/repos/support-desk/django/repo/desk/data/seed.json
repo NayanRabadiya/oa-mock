@@ -1,0 +1,11 @@
+{
+  "agents": [
+    {"id": "A1", "name": "Meera", "maxOpen": 3},
+    {"id": "A2", "name": "Tomas", "maxOpen": 2}
+  ],
+  "tickets": [
+    {"id": "T1", "title": "Can't log in", "customer": "acme", "priority": "high", "status": "open", "assigneeId": null, "createdAt": "2026-11-15T08:00:00Z", "resolvedAt": null},
+    {"id": "T2", "title": "Invoice is wrong", "customer": "globex", "priority": "medium", "status": "in_progress", "assigneeId": "A1", "createdAt": "2026-11-14T10:00:00Z", "resolvedAt": null},
+    {"id": "T3", "title": "Site is down", "customer": "initech", "priority": "urgent", "status": "resolved", "assigneeId": "A2", "createdAt": "2026-11-15T07:00:00Z", "resolvedAt": "2026-11-15T09:00:00Z"}
+  ]
+}

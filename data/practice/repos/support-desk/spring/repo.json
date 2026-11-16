@@ -1,0 +1,109 @@
+{
+ "stack": "spring",
+ "name": "Support Desk API (Spring Boot)",
+ "readonly": [
+  "README.md",
+  "pom.xml",
+  "src/test/*"
+ ],
+ "open": [
+  "src/main/java/com/desk/service/TicketService.java"
+ ],
+ "tests": [
+  {
+   "id": "com.desk.TicketTests.creatingATicketOpensIt",
+   "title": "Creating a ticket opens it",
+   "hidden": false
+  },
+  {
+   "id": "com.desk.TicketTests.ticketsAreListedByPriorityOldestFirst",
+   "title": "Tickets are listed by priority, oldest first",
+   "hidden": false
+  },
+  {
+   "id": "com.desk.TicketTests.anAgentCannotTakeMoreTicketsThanTheirLimit",
+   "title": "An agent can't take more tickets than their limit",
+   "hidden": false
+  },
+  {
+   "id": "com.desk.TicketTests.ticketsMoveThroughTheWorkflowInOrder",
+   "title": "Tickets move through the workflow in order",
+   "hidden": false
+  },
+  {
+   "id": "com.desk.TicketTests.aTicketIsOverdueOnlyAfterItsSLA",
+   "title": "A ticket is overdue only after its SLA",
+   "hidden": false
+  },
+  {
+   "id": "com.desk.MoreTicketTests.validatesTheRequest",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "com.desk.MoreTicketTests.filtersByStatusPriorityAndAssignee",
+   "title": "Filters by status, priority and assignee",
+   "hidden": true
+  },
+  {
+   "id": "com.desk.MoreTicketTests.resolvingRecordsWhenReopeningClearsIt",
+   "title": "Resolving records when; reopening clears it",
+   "hidden": true
+  },
+  {
+   "id": "com.desk.MoreTicketTests.finishedTicketsAreNeverOverdueAndDoNotCountTowardAnAgentLimit",
+   "title": "Finished tickets are never overdue and don't count toward a limit",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "src/main/java/com/desk/service/AssignmentService.java",
+   "test": "anAgentCannotTakeMoreTicketsThanTheirLimit",
+   "why": "the workload counts only open tickets, so tickets already in progress don't count toward the agent's limit",
+   "fix": "Count every unfinished ticket assigned to the agent: status open or in_progress.",
+   "edits": [
+    {
+     "fixed": "    private static final Set<String> ACTIVE = Set.of(\"open\", \"in_progress\");",
+     "buggy": "    private static final Set<String> ACTIVE = Set.of(\"open\");"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/desk/service/SlaService.java",
+   "test": "aTicketIsOverdueOnlyAfterItsSLA",
+   "why": "the time open is worked out in minutes, not hours, so tickets look overdue far too early",
+   "fix": "Divide the seconds by Times.SECONDS_PER_HOUR (60 * 60) to get hours.",
+   "edits": [
+    {
+     "fixed": "        return seconds / (double) Times.SECONDS_PER_HOUR;",
+     "buggy": "        return seconds / 60.0;"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/desk/service/TicketService.java",
+   "test": "ticketsAreListedByPriorityOldestFirst",
+   "why": "tickets with the same priority are listed newest first; the queue must serve the oldest first",
+   "fix": "Compare createdAt in natural (ascending) order as the tie-breaker after priority.",
+   "edits": [
+    {
+     "fixed": "                    .thenComparing(t -> Times.parse(t.createdAt()))",
+     "buggy": "                    .thenComparing(t -> Times.parse(t.createdAt()), Comparator.reverseOrder())"
+    }
+   ]
+  },
+  {
+   "file": "src/main/java/com/desk/service/WorkflowService.java",
+   "test": "ticketsMoveThroughTheWorkflowInOrder",
+   "why": "the workflow lets an in-progress ticket jump straight to closed, skipping resolved",
+   "fix": "From in_progress the only next status is resolved.",
+   "edits": [
+    {
+     "fixed": "            \"in_progress\", List.of(\"resolved\"),",
+     "buggy": "            \"in_progress\", List.of(\"resolved\", \"closed\"),"
+    }
+   ]
+  }
+ ]
+}
