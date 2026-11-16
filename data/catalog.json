@@ -136,18 +136,19 @@
   {
    "key": "practice",
    "name": "Practice Set",
-   "tagline": "Our own questions, written for this mock: repository warm-ups",
-   "questions": 1,
+   "tagline": "Our own questions, written for this mock: repository tasks and warm-ups",
+   "questions": 2,
    "years": [
     2026
    ],
    "roles": [],
    "colleges": [],
    "formats": [
-    "Repository warm-up"
+    "Repository warm-up",
+    "Repository task"
    ],
-   "bytes": 65303,
-   "download": 36000,
+   "bytes": 153708,
+   "download": 81000,
    "own": true
   }
  ]

@@ -2,12 +2,13 @@
   "key": "practice",
   "name": "Practice Set",
   "own": true,
-  "tagline": "Our own questions, written for this mock: repository warm-ups",
-  "headline": "Warm up on small repositories, then take on the real ones.",
-  "blurb": "questions written for this mock (not reported from a company OA): small repository tasks to practise the read, run, trace and fix loop",
+  "tagline": "Our own questions, written for this mock: repository tasks and warm-ups",
+  "headline": "Practise repository tasks on code written for this mock.",
+  "blurb": "questions written for this mock (not reported from a company OA): repository tasks to practise the read, run, trace and fix loop",
   "defaultFmt": "warmup",
   "custom": [
-    "library-loans"
+    "library-loans",
+    "support-desk"
   ],
   "formats": {
     "warmup": {
@@ -20,15 +21,26 @@
         ]
       ]
     },
+    "repo": {
+      "name": "Repository task",
+      "desc": "One full practice repository (Support Desk: 4 bugs) · 60 min",
+      "mins": 60,
+      "pools": [
+        [
+          "support-desk"
+        ]
+      ]
+    },
     "custom": {
       "name": "Custom",
       "desc": "Pick the questions and the time",
-      "mins": 30,
+      "mins": 60,
       "pools": []
     }
   },
   "offlist": [],
   "order": [
-    "library-loans"
+    "library-loans",
+    "support-desk"
   ]
 }

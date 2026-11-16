@@ -1,0 +1,110 @@
+{
+ "stack": "node",
+ "name": "Support Desk API (Node.js)",
+ "readonly": [
+  "README.md",
+  "package.json",
+  "jest.config.js",
+  "tests/*"
+ ],
+ "open": [
+  "services/ticketService.js"
+ ],
+ "tests": [
+  {
+   "id": "TicketTests.creating a ticket opens it",
+   "title": "Creating a ticket opens it",
+   "hidden": false
+  },
+  {
+   "id": "TicketTests.tickets are listed by priority, oldest first",
+   "title": "Tickets are listed by priority, oldest first",
+   "hidden": false
+  },
+  {
+   "id": "TicketTests.an agent cannot take more tickets than their limit",
+   "title": "An agent can't take more tickets than their limit",
+   "hidden": false
+  },
+  {
+   "id": "TicketTests.tickets move through the workflow in order",
+   "title": "Tickets move through the workflow in order",
+   "hidden": false
+  },
+  {
+   "id": "TicketTests.a ticket is overdue only after its SLA",
+   "title": "A ticket is overdue only after its SLA",
+   "hidden": false
+  },
+  {
+   "id": "MoreTicketTests.validates the request",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "MoreTicketTests.filters by status, priority and assignee",
+   "title": "Filters by status, priority and assignee",
+   "hidden": true
+  },
+  {
+   "id": "MoreTicketTests.resolving records when, reopening clears it",
+   "title": "Resolving records when; reopening clears it",
+   "hidden": true
+  },
+  {
+   "id": "MoreTicketTests.finished tickets are never overdue and do not count toward an agent limit",
+   "title": "Finished tickets are never overdue and don't count toward a limit",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "services/assignmentService.js",
+   "test": "an agent cannot take more tickets than their limit",
+   "why": "the workload counts only open tickets, so tickets already in progress don't count toward the agent's limit",
+   "fix": "Count every unfinished ticket assigned to the agent: status open or in_progress.",
+   "edits": [
+    {
+     "fixed": "const ACTIVE = ['open', 'in_progress'];",
+     "buggy": "const ACTIVE = ['open'];"
+    }
+   ]
+  },
+  {
+   "file": "services/slaService.js",
+   "test": "a ticket is overdue only after its SLA",
+   "why": "the time open is worked out in minutes, not hours, so tickets look overdue far too early",
+   "fix": "Divide the milliseconds by 1000 * 60 * 60 (MS_PER_HOUR) to get hours.",
+   "edits": [
+    {
+     "fixed": "const hoursOpen = (ticket, now) => (Date.parse(now) - Date.parse(ticket.createdAt)) / MS_PER_HOUR;",
+     "buggy": "const hoursOpen = (ticket, now) => (Date.parse(now) - Date.parse(ticket.createdAt)) / (1000 * 60);"
+    }
+   ]
+  },
+  {
+   "file": "services/ticketService.js",
+   "test": "tickets are listed by priority, oldest first",
+   "why": "tickets with the same priority are listed newest first; the queue must serve the oldest first",
+   "fix": "Compare createdAt in ascending order (a before b) as the tie-breaker after priority.",
+   "edits": [
+    {
+     "fixed": "  Date.parse(a.createdAt) - Date.parse(b.createdAt) ||",
+     "buggy": "  Date.parse(b.createdAt) - Date.parse(a.createdAt) ||"
+    }
+   ]
+  },
+  {
+   "file": "services/workflowService.js",
+   "test": "tickets move through the workflow in order",
+   "why": "the workflow lets an in-progress ticket jump straight to closed, skipping resolved",
+   "fix": "From in_progress the only next status is resolved.",
+   "edits": [
+    {
+     "fixed": "  in_progress: ['resolved'],",
+     "buggy": "  in_progress: ['resolved', 'closed'],"
+    }
+   ]
+  }
+ ]
+}

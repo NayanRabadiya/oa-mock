@@ -193,6 +193,13 @@ In a timed test the report lists how many hints and chat messages you used.
 
 Questions written for this mock rather than reported from an OA, kept apart from the company banks so nothing is passed off as a real question. It starts with **Library Loans (repository warm-up)**: a small API with 2 bugs in Node.js, Django or Spring Boot (4 visible tests, 3 more on Submit), to learn the repository workflow in 15 to 30 minutes before the full tasks.
 
+| Question | What it is |
+|---|---|
+| **Library Loans** (warm-up) | borrow and return books, late fees · 2 bugs, 4 + 3 tests |
+| **Support Desk** | ticket queue by priority, agent limits, a status workflow, SLA deadlines · 4 bugs, 5 + 4 tests |
+
+Each one comes in Node.js, Django and Spring Boot. Formats: **Repository warm-up** (30 min), **Repository task** (60 min), Custom.
+
 ### Flipkart
 
 13 coding questions + 1 SQL (run on an in-browser SQL engine). Formats: **SDE**, **Data Engineer**, **UI Engineer**, Custom.
