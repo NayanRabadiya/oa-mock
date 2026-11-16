@@ -169,17 +169,22 @@ Every **Submit** is saved twice: once as the plain source file, and once as a sm
 | Coding | Capable Tournament Winners (Medium) | 2024 online OA (HackerRank) |
 | Coding | Fewest Wildcards in a Common Pattern (Medium) | 2024 online OA (HackerRank) |
 | Repository task | **MovieDB Watchlist (repository)**: a real project in Node.js (MERN), Django or Spring Boot | SDE Intern OA 2026, section 2 (AI-assisted repo task) |
+| Repository task | **Return / Risk Evaluation (repository)**: Node.js (Express), Django or Spring Boot | SDE-1 Intern OA 2026, section 2 (reconstructed from a candidate's outline) |
 | Situational judgement | 12 workplace scenarios | Section 3 (scenarios written for this mock) |
 
 Amazon's coding questions are **LeetCode-style**. You complete `class Solution` (or a function in JavaScript) in any of the four languages and return the answer. A hidden driver reads the input and prints your result, so Run, Submit and Custom input work as usual.
 
-**Formats:** SDE Intern OA 2026 (all 3 sections, 120 min) · IIITD coding set (70 min) · Online coding set 2024 (5 questions, 150 min) · Repository task (60 min) · Custom.
+**Formats:** SDE Intern OA 2026 (all 3 sections, 120 min) · IIITD coding set (70 min) · Online coding set 2024 (5 questions, 150 min) · SDE OA 2026 (AI-assisted: one coding question, then one repository task, 100 min) · Repository task (one of the two, 60 min) · Custom.
 
-The **repository task** is the same bug hunt as the real OA's repo section: a real project in a small IDE (file tree, tabs, README, read-only tests), with **Run tests** and **Submit** like HackerRank's Code Repository questions. You pick the environment first. If it isn't set up, the app says what it installs, how big it is and how long it takes, then installs it into its own folder (`.oa-cache/envs/`). You can set up several and switch in practice; a timed test keeps the one you chose and starts from a fresh copy of the repository. Each version has 6 bugs (4 in the controller, 1 in the routes, 1 in the rate limiter, as reported from the OA), 6 visible tests and 8 more on Submit. Setting up an environment takes a minute or a few: Node.js about 100 MB to download (it includes a MongoDB that runs in memory for the tests), Django about 10 MB, Spring Boot about 80 MB (Maven and the Spring libraries). It needs Node.js 18+, Python 3.10+ or Java 17+ on your computer; the app says how to get it if it is missing.
+The **repository task** is the same bug hunt as the real OA's repo section: a real project in a small IDE (file tree, tabs, README, read-only tests), with **Run tests** and **Submit** like HackerRank's Code Repository questions. You pick the environment first. If it isn't set up, the app says what it installs, how big it is and how long it takes, then installs it into its own folder (`.oa-cache/envs/`). You can set up several and switch in practice; a timed test keeps the one you chose and starts from a fresh copy of the repository. Each repository has 6 bugs, 6 visible tests and 8 more on Submit. MovieDB's bugs are where the OA had them (4 in the controller, 1 in the routes, 1 in the rate limiter); Return / Risk spreads them over the services (category lookup, return window, linked accounts, history, scoring, decision thresholds). Setting up an environment takes a minute or a few: Node.js about 100 MB to download (it includes a MongoDB that runs in memory for the tests), Django about 10 MB, Spring Boot about 80 MB (Maven and the Spring libraries). It needs Node.js 18+, Python 3.10+ or Java 17+ on your computer; the app says how to get it if it is missing.
 
 ![Repository task](docs/repository.png)
 
-The *Return/Risk Evaluation* repo task is listed but can't be run, because only an outline of it was reported.
+*Return / Risk Evaluation* is rebuilt from a candidate's outline of the real question (7+ files, return windows, linked accounts, risk scoring, approve / review / reject, 6 failing integrated tests). The real code wasn't shared, so the files, rules and bugs are ours; the question says so.
+
+### Practice Set (our own questions)
+
+Questions written for this mock rather than reported from an OA, kept apart from the company banks so nothing is passed off as a real question. It starts with **Library Loans (repository warm-up)**: a small API with 2 bugs in Node.js, Django or Spring Boot (4 visible tests, 3 more on Submit), to learn the repository workflow in 15 to 30 minutes before the full tasks.
 
 ### Flipkart
 

@@ -1,0 +1,14 @@
+{
+  "books": [
+    {"id": "B1", "title": "The Pragmatic Programmer", "copies": 2},
+    {"id": "B2", "title": "Clean Code", "copies": 1},
+    {"id": "B3", "title": "Designing Data-Intensive Applications", "copies": 3}
+  ],
+  "members": [
+    {"id": "M1", "name": "Asha"},
+    {"id": "M2", "name": "Bilal"}
+  ],
+  "loans": [
+    {"id": "L1", "memberId": "M1", "bookId": "B2", "borrowedAt": "2026-11-01", "returnedAt": null}
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "key": "practice",
+  "name": "Practice Set",
+  "own": true,
+  "tagline": "Our own questions, written for this mock: repository warm-ups",
+  "headline": "Warm up on small repositories, then take on the real ones.",
+  "blurb": "questions written for this mock (not reported from a company OA): small repository tasks to practise the read, run, trace and fix loop",
+  "defaultFmt": "warmup",
+  "custom": [
+    "library-loans"
+  ],
+  "formats": {
+    "warmup": {
+      "name": "Repository warm-up",
+      "desc": "Library Loans: a small API with two bugs, in Node.js, Django or Spring Boot · 30 min",
+      "mins": 30,
+      "pools": [
+        [
+          "library-loans"
+        ]
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 30,
+      "pools": []
+    }
+  },
+  "offlist": [],
+  "order": [
+    "library-loans"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+ "id": "returns-risk",
+ "type": "repo",
+ "title": "Return / Risk Evaluation (repository)",
+ "diff": "Repo",
+ "src": "Amazon SDE-1 Intern OA 2026 · section 2 (repository reconstructed for this mock)",
+ "body": "<p>You are given the repository of a <b>return / risk evaluation service</b>. When a customer asks to return an item, it decides whether to <b>auto-approve</b> the return, send it for <b>manual review</b>, or <b>reject</b> it, and returns the reason codes a support agent sees.</p>\n<p>The logic spans several components:</p>\n<ul>\n<li>category returnability and return-window validation,</li>\n<li>linked-account aggregation and return history,</li>\n<li>order-value-based scoring and the risk-score calculation,</li>\n<li>auto-approve / manual-review / reject decisions and reason mapping.</li>\n</ul>\n<p><b>Issue:</b> support agents report wrong decisions: returns rejected on the last day of their window, customers with an obvious return pattern across linked accounts approved automatically, expensive multi-unit returns scored too low, and high-risk returns sent to review instead of being rejected. <b>6 integrated test cases</b> fail.</p>\n<p>Understand the codebase and the existing logic, run the tests, find why they fail, identify the right component, change the implementation, and run the tests again until they pass. The rules are in <code>README.md</code>.</p>\n<p><b>Note:</b> the acceptance criteria are the predefined tests; more tests run when you submit. The repository may contain issues unrelated to this task.</p>\n<p class=\"muted\">Reconstructed for this mock from a candidate's outline of the real question (7+ files, the components above, 6 integrated tests). The real repository's code wasn't shared, so the files, rules and bugs here are our own.</p>",
+ "stacks": [
+  "node",
+  "django",
+  "spring"
+ ],
+ "year": 2026,
+ "role": "SDE Intern",
+ "inp": "",
+ "out": "",
+ "cons": [],
+ "samples": [],
+ "hidden": [],
+ "ref": "",
+ "lc": null,
+ "lcurl": null
+}

@@ -1,0 +1,24 @@
+{
+  "customers": [
+    { "id": "C100", "name": "Priya Nair", "createdAt": "2023-02-11", "linkedAccountIds": ["C101"] },
+    { "id": "C101", "name": "Rahul Nair", "createdAt": "2024-06-03", "linkedAccountIds": ["C100", "C102"] },
+    { "id": "C102", "name": "Meera Nair", "createdAt": "2026-10-28", "linkedAccountIds": ["C101"] },
+    { "id": "C200", "name": "Arjun Rao", "createdAt": "2025-01-19", "linkedAccountIds": [] }
+  ],
+  "orders": [
+    { "id": "O-5001", "customerId": "C100", "status": "DELIVERED", "deliveredAt": "2026-10-20",
+      "items": [
+        { "id": "I-1", "name": "Noise-cancelling headphones", "category": "Electronics", "price": 249.0, "quantity": 1 },
+        { "id": "I-2", "name": "Cotton kurta", "category": "Apparel", "price": 35.5, "quantity": 2 },
+        { "id": "I-3", "name": "Basmati rice 5 kg", "category": "Grocery", "price": 18.0, "quantity": 1 }
+      ] },
+    { "id": "O-5002", "customerId": "C102", "status": "SHIPPED", "deliveredAt": null,
+      "items": [ { "id": "I-1", "name": "Smartwatch", "category": "Electronics", "price": 699.0, "quantity": 1 } ] },
+    { "id": "O-5003", "customerId": "C200", "status": "DELIVERED", "deliveredAt": "2026-09-01",
+      "items": [ { "id": "I-1", "name": "Ceramic dinner set", "category": "Home & Kitchen", "price": 89.0, "quantity": 1 } ] }
+  ],
+  "returns": [
+    { "id": "RET-0001", "customerId": "C101", "orderId": "O-4100", "itemId": "I-1", "status": "APPROVED", "amount": 120.0, "date": "2026-10-02" },
+    { "id": "RET-0002", "customerId": "C102", "orderId": "O-4180", "itemId": "I-2", "status": "REJECTED", "amount": 60.0, "date": "2026-10-30" }
+  ]
+}

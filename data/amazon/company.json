@@ -14,6 +14,7 @@
     "winners",
     "qmarks",
     "watchlist-repo",
+    "returns-risk",
     "sjt"
   ],
   "formats": {
@@ -68,13 +69,35 @@
         ]
       ]
     },
+    "ai": {
+      "name": "SDE OA 2026 (AI-assisted)",
+      "desc": "The AI-assisted format: one coding question (about 40 min), then one repository task, MovieDB or Return / Risk (about 60 min) · 100 min",
+      "mins": 100,
+      "pools": [
+        [
+          "flip",
+          "palsub",
+          "evenrun",
+          "findpairs",
+          "parcels",
+          "outlier",
+          "winners",
+          "qmarks"
+        ],
+        [
+          "watchlist-repo",
+          "returns-risk"
+        ]
+      ]
+    },
     "repo": {
       "name": "Repository task",
-      "desc": "MovieDB watchlist as a real project: pick your environment, then fix the backend until the tests pass · 60 min",
+      "desc": "One repository task, MovieDB watchlist or Return / Risk Evaluation: pick your environment, then fix the backend until the tests pass · 60 min",
       "mins": 60,
       "pools": [
         [
-          "watchlist-repo"
+          "watchlist-repo",
+          "returns-risk"
         ]
       ]
     },
@@ -85,13 +108,6 @@
       "pools": []
     }
   },
-  "offlist": [
-    {
-      "t": "Return/Risk Evaluation System (repo debugging)",
-      "s": "Amazon SDE-1 Intern OA 2026 · section 2",
-      "why": "Only an outline was shared (7+ files, return-window checks, linked accounts, risk scoring, approve/review/reject decisions, 6 integrated tests). It is coming as a repository question, reconstructed from the outline. Until then the MovieDB repository task practises the same read-trace-fix workflow."
-    }
-  ],
   "order": [
     "flip",
     "palsub",
@@ -102,6 +118,7 @@
     "winners",
     "qmarks",
     "watchlist-repo",
+    "returns-risk",
     "sjt"
   ]
 }
