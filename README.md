@@ -180,6 +180,13 @@ The **repository task** is the same bug hunt as the real OA's repo section: a re
 
 ![Repository task](docs/repository.png)
 
+The **Assistant** tab next to the README helps while you debug, the way you choose:
+- **Hints**: for each failing visible test, a three-step ladder (where to look, what's wrong, how to fix it), one step at a time. Needs nothing.
+- **AI chat**: ask an AI model about the code. It sees the question, the README, your current files and the latest test results. Bring your own API key for **Claude**, **OpenAI**, **Google Gemini** or **OpenRouter** (DeepSeek, Qwen, Llama and more), or run a model on your computer with **Ollama** (no key). **Coach** mode points you to the problem without writing the fix; **Full help** answers like the real OA's assistant. Keys stay on your computer in `.oa-cache/assistant.json` and go only to the provider they belong to; **Load models** asks the provider for its current models.
+- **Off**.
+
+In a timed test the report lists how many hints and chat messages you used.
+
 *Return / Risk Evaluation* is rebuilt from a candidate's outline of the real question (7+ files, return windows, linked accounts, risk scoring, approve / review / reject, 6 failing integrated tests). The real code wasn't shared, so the files, rules and bugs are ours; the question says so.
 
 ### Practice Set (our own questions)
@@ -242,6 +249,7 @@ app/server/                backend (Python 3.8+, stdlib only; tools import it as
   contribute.py            checks a new question, saves it, opens a pull request with the GitHub CLI
   envs.py                  environments for repository questions (Node.js, Django, Spring Boot), set up
                            into .oa-cache/envs/ with a size and time estimate
+  assist.py                the Assistant for repository questions: hint ladder, AI chat (Claude, OpenAI, Gemini, OpenRouter, Ollama)
   repos.py                 repository questions: your working copy, files, Run tests / Submit (JUnit report)
   submissions.py           saves / lists / reads past submissions in .oa-cache/
   data.py                  loads data/<company>/, reloading when files change

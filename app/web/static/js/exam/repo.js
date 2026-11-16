@@ -35,9 +35,11 @@ function repoHTML(q, e){
       <div class="doc-tabs" role="tablist" aria-label="Question and README">
         <button role="tab" data-doc="q" aria-selected="true">Question</button>
         <button role="tab" data-doc="readme" aria-selected="false" ${stack ? "" : "disabled"}>README.md</button>
+        <button role="tab" data-doc="ai" aria-selected="false" ${stack ? "" : "disabled"}>Assistant</button>
       </div>
       <div class="doc" id="doc-q">${q.body}</div>
       <div class="doc md" id="doc-readme" hidden></div>
+      <div class="doc" id="doc-ai" hidden>${aiTabHTML()}</div>
     </article>
     <div class="rz-v" id="rz-v" role="separator" aria-orientation="vertical" aria-label="Resize the question panel" tabindex="0"></div>
     <section class="work repo-work" aria-label="Repository">
@@ -233,6 +235,7 @@ function openRepo(e, q){
     const first = R.cur || want[want.length - 1];
     Promise.all(want.map(p => openFile(p, false))).then(() => { if (first) openFile(first, true); });
     loadReadme(stack);
+    if (R.doc && R.doc !== "q") showDoc(R.doc);
     if (t.stale) toast("This repository was updated since you started. Reset it to get the new version.");
     const last = R.last[q.id + ":" + stack + ":" + repoWS()]; if (last) drawResults(last, true);
     const ed = $("#editor"); if (ed) ed.classList.toggle("ro", false);
@@ -325,7 +328,9 @@ function loadReadme(stack){
 }
 function showDoc(which){
   document.querySelectorAll(".doc-tabs [data-doc]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.doc === which)));
-  $("#doc-q").hidden = which !== "q"; $("#doc-readme").hidden = which !== "readme";
+  $("#doc-q").hidden = which !== "q"; $("#doc-readme").hidden = which !== "readme"; $("#doc-ai").hidden = which !== "ai";
+  R.doc = which;
+  if (which === "ai") drawAssist();
 }
 // Enough Markdown for a README: headings, paragraphs, lists, tables, code blocks, inline code, bold, italic, links.
 function mdHTML(src){
@@ -396,6 +401,7 @@ async function repoRun(full){
       const tab = document.querySelector(`.qtab[data-q="${e.cur}"] .dot`); if (tab) tab.className = "dot " + (e.best[id].score === 100 ? "full" : e.best[id].score > 0 ? "part" : "");
     }
     drawResults(res);
+    assistAfterRun();
   } catch (err){
     $("#out").innerHTML = `<div class="verdict bad">Couldn't run the tests</div><p>${esc(err.message)}</p>`; setStat("Error", "bad");
   } finally { R.busy = false; const r = $("#run"), s = $("#submit"); if (r) r.disabled = false; if (s) s.disabled = false; }

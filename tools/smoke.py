@@ -23,7 +23,7 @@ def main():
     assert keys, "no companies in data/"
     for path in ["/", "/contribute", "/" + keys[0], "/api/companies/%s/data.js" % keys[0], "/static/js/landing.js",
                  "/static/js/install.js", "/static/css/install.css", "/static/js/exam/langpick.js", "/static/llm-prompt.md",
-                 "/static/js/exam/repo.js", "/static/css/repo.css"]:
+                 "/static/js/exam/repo.js", "/static/js/exam/assist.js", "/static/css/repo.css"]:
         code, body = get(path)
         assert code == 200 and body, path
         print("ok  GET", path)
