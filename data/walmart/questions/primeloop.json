@@ -1,0 +1,134 @@
+{
+ "id": "primeloop",
+ "type": "code",
+ "title": "Circular Queue of Primes",
+ "diff": "Easy",
+ "src": "Walmart OA (college not given; 2 coding questions + 35 MCQs). Coding question 1.",
+ "body": "<p>You are given two positive integers <code>N</code> and <code>P</code>.</p><p>Write all primes less than or equal to <code>N</code> in increasing order. They form a <b>circular queue</b>: after the last prime comes the first one again, and so on forever.</p><p>Walk along this queue from the front, keeping a running sum of the primes you pass. Return the <b>0-based position in the queue</b> (the index of that prime within the list of primes up to <code>N</code>) of the first prime that makes the running sum <b>strictly greater</b> than <code>P</code>.</p><h3>Function to complete</h3><p>Complete <code>firstCrossIndex(N, P)</code>. It returns the 0-based index in the queue of the prime that makes the sum exceed P.</p><p class=\"muted\">Input reading and printing are handled for you, like on LeetCode. The input format below is what the tests and <i>Custom input</i> use.</p>",
+ "inp": "One line: <code>N P</code>.",
+ "out": "One integer: the 0-based position in the queue.",
+ "cons": [
+  "2 ≤ N ≤ 10^6",
+  "1 ≤ P ≤ 10^15"
+ ],
+ "samples": [
+  {
+   "in": "20 25\n",
+   "out": "4",
+   "ex": "The queue is 2, 3, 5, 7, 11, 13, 17, 19. Running sums: 2, 5, 10, 17, 28. The sum first exceeds 25 at 11, which is at index 4."
+  },
+  {
+   "in": "3 5\n",
+   "out": "0",
+   "ex": "The queue is 2, 3. Sums: 2, 5, then (wrapping round) 7 at index 0. 7 > 5, so the answer is 0."
+  }
+ ],
+ "spec": {
+  "fn": "firstCrossIndex",
+  "read": [
+   [
+    "N",
+    "int"
+   ],
+   [
+    "P",
+    "long"
+   ]
+  ],
+  "ret": "int",
+  "returns": "the 0-based index in the queue of the prime that makes the sum exceed P"
+ },
+ "ref": "class Solution:\n    def firstCrossIndex(self, N: int, P: int) -> int:\n        is_prime = bytearray([1]) * (N + 1)\n        is_prime[0] = 0\n        if N >= 1:\n            is_prime[1] = 0\n        for i in range(2, int(N ** 0.5) + 1):\n            if is_prime[i]:\n                is_prime[i * i::i] = bytearray(len(range(i * i, N + 1, i)))\n        primes = [i for i in range(2, N + 1) if is_prime[i]]\n        total = sum(primes)\n        # every full lap adds total, so only the remainder matters\n        remainder = P % total\n        running = 0\n        for index, p in enumerate(primes):\n            running += p\n            if running > remainder:\n                return index\n        return -1\n",
+ "wrong": [
+  {
+   "why": "does not wrap around the queue",
+   "ref": "class Solution:\n    def firstCrossIndex(self, N, P):\n        primes = [i for i in range(2, N + 1) if all(i % d for d in range(2, int(i ** 0.5) + 1))]\n        running = 0\n        for index, p in enumerate(primes):\n            running += p\n            if running > P:\n                return index\n        return len(primes) - 1\n"
+  },
+  {
+   "why": "uses >= instead of strictly greater, and loops one prime at a time",
+   "ref": "class Solution:\n    def firstCrossIndex(self, N, P):\n        primes = [i for i in range(2, N + 1) if all(i % d for d in range(2, int(i ** 0.5) + 1))]\n        running = 0\n        index = 0\n        while True:\n            running += primes[index % len(primes)]\n            if running >= P:\n                return index % len(primes)\n            index += 1\n"
+  }
+ ],
+ "hidden": [
+  {
+   "in": "20 25\n",
+   "out": "4"
+  },
+  {
+   "in": "2 1\n",
+   "out": "0"
+  },
+  {
+   "in": "2 2\n",
+   "out": "0"
+  },
+  {
+   "in": "2 5\n",
+   "out": "0"
+  },
+  {
+   "in": "3 1\n",
+   "out": "0"
+  },
+  {
+   "in": "3 5\n",
+   "out": "0"
+  },
+  {
+   "in": "10 17\n",
+   "out": "0"
+  },
+  {
+   "in": "10 1000000000000000\n",
+   "out": "3"
+  },
+  {
+   "in": "30 100\n",
+   "out": "9"
+  },
+  {
+   "in": "100 1\n",
+   "out": "0"
+  },
+  {
+   "in": "1000000 1000000000000000\n",
+   "out": "73572"
+  },
+  {
+   "in": "1000000 1\n",
+   "out": "0"
+  },
+  {
+   "in": "97 1060\n",
+   "out": "0"
+  },
+  {
+   "in": "13 41\n",
+   "out": "0"
+  }
+ ],
+ "stub": {
+  "py": "class Solution:\n    def firstCrossIndex(self, N: int, P: int) -> int:\n        return 0\n",
+  "cpp": "class Solution {\npublic:\n    int firstCrossIndex(int N, long long P) {\n        \n        return 0;\n    }\n};\n",
+  "java": "class Solution {\n    public int firstCrossIndex(int N, long P) {\n        \n        return 0;\n    }\n}\n",
+  "js": "/**\n * @param {number} N\n * @param {number} P\n * @return {number}\n */\nvar firstCrossIndex = function(N, P) {\n    \n    return 0;\n};\n"
+ },
+ "driver": {
+  "py": {
+   "pre": "from typing import *\nimport sys, math, collections, heapq, bisect, itertools, functools\nfrom collections import *\n",
+   "post": "\n\nif __name__ == \"__main__\":\n    _raw = sys.stdin.read(); _t = _raw.split(); _p = 0\n    N = int(_t[_p]); _p += 1\n    P = int(_t[_p]); _p += 1\n    _r = Solution().firstCrossIndex(N, P)\n    print(_r)\n"
+  },
+  "cpp": {
+   "pre": "#include <bits/stdc++.h>\nusing namespace std;\n",
+   "post": "\n\nint main() {\n    ios::sync_with_stdio(false); cin.tie(nullptr);\n    int N; cin >> N;\n    long long P; cin >> P;\n    auto _r = Solution().firstCrossIndex(N, P);\n    cout << _r << \"\\n\";\n    return 0;\n}\n"
+  },
+  "java": {
+   "pre": "import java.util.*;\nimport java.io.*;\n",
+   "post": "\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        String _raw = new String(System.in.readAllBytes());\n        String[] _t = _raw.trim().isEmpty() ? new String[0] : _raw.trim().split(\"\\\\s+\");\n        int _p = 0;\n        int N = Integer.parseInt(_t[_p++]);\n        long P = Long.parseLong(_t[_p++]);\n        int _r = new Solution().firstCrossIndex(N, P);\n        StringBuilder _sb = new StringBuilder();\n        _sb.append(_r).append('\\n');\n        System.out.print(_sb);\n    }\n}\n"
+  },
+  "js": {
+   "pre": "",
+   "post": "\n\n;(() => {\n    const _raw = require(\"fs\").readFileSync(0, \"utf8\");\n    const _t = _raw.split(/\\s+/).filter(Boolean); let _p = 0;\n    const N = Number(_t[_p++]);\n    const P = Number(_t[_p++]);\n    const _r = firstCrossIndex(N, P);\n    console.log(String(_r));\n})();\n"
+  }
+ }
+}

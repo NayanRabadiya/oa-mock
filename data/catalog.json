@@ -131,6 +131,27 @@
    ],
    "bytes": 22169971,
    "download": 7246000
+  },
+  {
+   "key": "walmart",
+   "name": "Walmart OA Mock",
+   "tagline": "Coding · IIT BHU · IIT Guwahati · more",
+   "questions": 5,
+   "years": [
+    2026
+   ],
+   "roles": [],
+   "colleges": [
+    "IIT BHU",
+    "IIT Guwahati"
+   ],
+   "formats": [
+    "IIT BHU OA",
+    "IIT Guwahati OA",
+    "Set 3 (college not given)"
+   ],
+   "bytes": 7738017,
+   "download": 2801000
   }
  ]
 }

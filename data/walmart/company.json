@@ -1,0 +1,90 @@
+{
+  "key": "walmart",
+  "name": "Walmart OA Mock",
+  "tagline": "Coding · IIT BHU · IIT Guwahati · more",
+  "headline": "Sit a timed Walmart OA, then see what passed.",
+  "blurb": "coding questions reported from Walmart OAs (IIT BHU, IIT Guwahati and one set whose college wasn't given)",
+  "defaultFmt": "bhu",
+  "custom": [
+    "peaks",
+    "primeloop"
+  ],
+  "formats": {
+    "bhu": {
+      "name": "IIT BHU OA",
+      "desc": "Minimum Relay Packs, Count Valid Advertisement Schedules, Split Tasks Between Two Assistants · 90 min (time assumed)",
+      "mins": 90,
+      "pools": [
+        [
+          "relaypacks"
+        ],
+        [
+          "adschedules"
+        ],
+        [
+          "twoassist"
+        ]
+      ]
+    },
+    "iitg": {
+      "name": "IIT Guwahati OA",
+      "desc": "Maximum Peaks at Minimum Cost · 40 min (time assumed)",
+      "mins": 40,
+      "pools": [
+        [
+          "peaks"
+        ]
+      ]
+    },
+    "set3": {
+      "name": "Set 3 (college not given)",
+      "desc": "Circular Queue of Primes (the set's second question, on a bishop, couldn't be added) · 40 min",
+      "mins": 40,
+      "pools": [
+        [
+          "primeloop"
+        ]
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 60,
+      "pools": []
+    }
+  },
+  "offlist": [
+    {
+      "t": "Maximum cells a bishop can cover in k moves on an M x N board",
+      "s": "Walmart OA (college not given), coding question 2 of 2",
+      "why": "Only the one-line statement was reported: no constraints, input format or examples, and it doesn't say whether the starting cell counts or whether cells can be revisited."
+    },
+    {
+      "t": "Assign modules to 3 servers to maximise the minimum of |d1-d2| + |d2-d3|",
+      "s": "Walmart OA (college not given)",
+      "why": "Retyped without constraints, input format or examples, and the 'maximum of the minimum' wording is ambiguous."
+    },
+    {
+      "t": "Finance Transaction Analytics API (Node.js and Express, 3 endpoints, one writes a JSON file)",
+      "s": "Walmart OA (college not given), backend question",
+      "why": "A backend task, and the exact 404 error message is only in the original assessment, which wasn't shared. The app has no Express runner."
+    },
+    {
+      "t": "35 MCQs: OS, OOP, SQL queries, hashing collisions, stack and circular-queue operations, age puzzle, AI-hallucination situation",
+      "s": "Walmart OA (college not given)",
+      "why": "Only the topics were reported, not the questions."
+    },
+    {
+      "t": "10 CS-fundamentals MCQs plus a small project (Node.js, Python Django or other) with an AI assistant for clarifying questions only",
+      "s": "Walmart OA, IIT Guwahati",
+      "why": "Only the format was reported."
+    }
+  ],
+  "order": [
+    "relaypacks",
+    "adschedules",
+    "twoassist",
+    "peaks",
+    "primeloop"
+  ]
+}

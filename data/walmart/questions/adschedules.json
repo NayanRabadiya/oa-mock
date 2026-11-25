@@ -1,0 +1,144 @@
+{
+ "id": "adschedules",
+ "type": "code",
+ "title": "Count Valid Advertisement Schedules",
+ "diff": "Hard",
+ "src": "Walmart OA, IIT BHU. Coding question 2 of 3.",
+ "college": "IIT BHU",
+ "body": "<p>An advertising system has <code>n</code> advertisement slots in a row. Each slot shows one of <code>c</code> campaigns. To avoid repetition, the same campaign may appear in <b>at most <code>k</code> consecutive slots</b>.</p><p>Two schedules are different if some slot shows a different campaign. Count the valid schedules and return the answer modulo <code>10<sup>9</sup> + 7</code>.</p><h3>Function to complete</h3><p>Complete <code>countSchedules(n, k, c)</code>. It returns the number of valid schedules modulo 10^9 + 7.</p><p class=\"muted\">Input reading and printing are handled for you, like on LeetCode. The input format below is what the tests and <i>Custom input</i> use.</p>",
+ "inp": "One line: <code>n k c</code>.",
+ "out": "One integer: the number of valid schedules modulo 10<sup>9</sup> + 7.",
+ "cons": [
+  "1 ≤ n ≤ 10^9",
+  "1 ≤ k ≤ 100",
+  "1 ≤ c ≤ 10^9"
+ ],
+ "samples": [
+  {
+   "in": "3 2 2\n",
+   "out": "6",
+   "ex": "Of the 8 schedules, 111 and 222 show one campaign three times in a row, leaving 6."
+  },
+  {
+   "in": "4 2 2\n",
+   "out": "10",
+   "ex": "Of the 16 schedules, 6 contain a run of 3 or more."
+  }
+ ],
+ "spec": {
+  "fn": "countSchedules",
+  "read": [
+   [
+    "n",
+    "long"
+   ],
+   [
+    "k",
+    "int"
+   ],
+   [
+    "c",
+    "long"
+   ]
+  ],
+  "ret": "int",
+  "returns": "the number of valid schedules modulo 10^9 + 7"
+ },
+ "ref": "class Solution:\n    def countSchedules(self, n: int, k: int, c: int) -> int:\n        MOD = 1000000007\n        if n <= k:\n            return pow(c, n, MOD)\n        # f(i) = number of valid schedules of length i.\n        # For i > k: f(i) = (c - 1) * (f(i - 1) + ... + f(i - k)),\n        # because the last run has length 1..k and the campaign before it must differ.\n        # f(1..k) = c^i.  f(n) is found by computing x^(n - 1) modulo the recurrence polynomial.\n        d = (c - 1) % MOD\n        first = [pow(c, i, MOD) for i in range(1, k + 1)]\n\n        def multiply(a, b):\n            prod = [0] * (2 * k - 1)\n            for i in range(k):\n                if a[i]:\n                    for j in range(k):\n                        prod[i + j] = (prod[i + j] + a[i] * b[j]) % MOD\n            # x^i = d * (x^(i-1) + ... + x^(i-k))\n            for i in range(2 * k - 2, k - 1, -1):\n                coef = prod[i] * d % MOD\n                if coef:\n                    for j in range(1, k + 1):\n                        prod[i - j] = (prod[i - j] + coef) % MOD\n            return prod[:k]\n\n        result = [1] + [0] * (k - 1)\n        base = [0] * k\n        if k == 1:\n            base[0] = d\n        else:\n            base[1] = 1\n        power = n - 1\n        while power > 0:\n            if power % 2 == 1:\n                result = multiply(result, base)\n            base = multiply(base, base)\n            power //= 2\n        return sum(result[i] * first[i] for i in range(k)) % MOD\n",
+ "wrong": [
+  {
+   "why": "O(n*k) dynamic programming: correct but far too slow for n up to 10^9",
+   "ref": "class Solution:\n    def countSchedules(self, n, k, c):\n        MOD = 1000000007\n        f = [0] * (n + 1)\n        for i in range(1, n + 1):\n            f[i] = pow(c, i, MOD) if i <= k else 0\n            if i > k:\n                for j in range(1, k + 1):\n                    f[i] += (c - 1) * f[i - j]\n                f[i] %= MOD\n        return f[n]\n"
+  },
+  {
+   "why": "off-by-one: allows runs of at most k-1 and loops one slot at a time",
+   "ref": "class Solution:\n    def countSchedules(self, n, k, c):\n        MOD = 1000000007\n        f = [0] * (n + 1)\n        for i in range(1, n + 1):\n            f[i] = pow(c, i, MOD) if i < k else 0\n            if i >= k:\n                for j in range(1, k):\n                    f[i] += (c - 1) * f[i - j]\n                f[i] %= MOD\n        return f[n]\n"
+  }
+ ],
+ "hidden": [
+  {
+   "in": "3 2 2\n",
+   "out": "6"
+  },
+  {
+   "in": "4 2 2\n",
+   "out": "10"
+  },
+  {
+   "in": "1 1 1\n",
+   "out": "1"
+  },
+  {
+   "in": "1 1 5\n",
+   "out": "5"
+  },
+  {
+   "in": "5 1 1\n",
+   "out": "0"
+  },
+  {
+   "in": "5 1 2\n",
+   "out": "2"
+  },
+  {
+   "in": "3 3 3\n",
+   "out": "27"
+  },
+  {
+   "in": "6 3 2\n",
+   "out": "48"
+  },
+  {
+   "in": "7 2 3\n",
+   "out": "1344"
+  },
+  {
+   "in": "10 4 5\n",
+   "out": "9687520"
+  },
+  {
+   "in": "2 1 1000000000\n",
+   "out": "56"
+  },
+  {
+   "in": "1000000000 100 1000000000\n",
+   "out": "926217310"
+  },
+  {
+   "in": "1000000000 1 1000000000\n",
+   "out": "137450696"
+  },
+  {
+   "in": "999999999 99 2\n",
+   "out": "175945012"
+  },
+  {
+   "in": "1000000000 2 1\n",
+   "out": "0"
+  }
+ ],
+ "stub": {
+  "py": "class Solution:\n    def countSchedules(self, n: int, k: int, c: int) -> int:\n        return 0\n",
+  "cpp": "class Solution {\npublic:\n    int countSchedules(long long n, int k, long long c) {\n        \n        return 0;\n    }\n};\n",
+  "java": "class Solution {\n    public int countSchedules(long n, int k, long c) {\n        \n        return 0;\n    }\n}\n",
+  "js": "/**\n * @param {number} n\n * @param {number} k\n * @param {number} c\n * @return {number}\n */\nvar countSchedules = function(n, k, c) {\n    \n    return 0;\n};\n"
+ },
+ "driver": {
+  "py": {
+   "pre": "from typing import *\nimport sys, math, collections, heapq, bisect, itertools, functools\nfrom collections import *\n",
+   "post": "\n\nif __name__ == \"__main__\":\n    _raw = sys.stdin.read(); _t = _raw.split(); _p = 0\n    n = int(_t[_p]); _p += 1\n    k = int(_t[_p]); _p += 1\n    c = int(_t[_p]); _p += 1\n    _r = Solution().countSchedules(n, k, c)\n    print(_r)\n"
+  },
+  "cpp": {
+   "pre": "#include <bits/stdc++.h>\nusing namespace std;\n",
+   "post": "\n\nint main() {\n    ios::sync_with_stdio(false); cin.tie(nullptr);\n    long long n; cin >> n;\n    int k; cin >> k;\n    long long c; cin >> c;\n    auto _r = Solution().countSchedules(n, k, c);\n    cout << _r << \"\\n\";\n    return 0;\n}\n"
+  },
+  "java": {
+   "pre": "import java.util.*;\nimport java.io.*;\n",
+   "post": "\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        String _raw = new String(System.in.readAllBytes());\n        String[] _t = _raw.trim().isEmpty() ? new String[0] : _raw.trim().split(\"\\\\s+\");\n        int _p = 0;\n        long n = Long.parseLong(_t[_p++]);\n        int k = Integer.parseInt(_t[_p++]);\n        long c = Long.parseLong(_t[_p++]);\n        int _r = new Solution().countSchedules(n, k, c);\n        StringBuilder _sb = new StringBuilder();\n        _sb.append(_r).append('\\n');\n        System.out.print(_sb);\n    }\n}\n"
+  },
+  "js": {
+   "pre": "",
+   "post": "\n\n;(() => {\n    const _raw = require(\"fs\").readFileSync(0, \"utf8\");\n    const _t = _raw.split(/\\s+/).filter(Boolean); let _p = 0;\n    const n = Number(_t[_p++]);\n    const k = Number(_t[_p++]);\n    const c = Number(_t[_p++]);\n    const _r = countSchedules(n, k, c);\n    console.log(String(_r));\n})();\n"
+  }
+ }
+}
