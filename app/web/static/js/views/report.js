@@ -9,10 +9,10 @@ function reportHTML(){
   const rows = ids.map((id, i) => { const q = QMAP[id], b = e.best[id], s = b ? b.score : 0, cb = e.code[id] || {}, code = cb[bufKey(q, e.lang[id])] != null ? cb[bufKey(q, e.lang[id])] : cb[e.lang[id]] != null ? cb[e.lang[id]] : cb[e.lang[id] + "@hr"];
     return `<div class="rq"><div class="rq-head"><span class="pill d-${q.diff}">${q.diff}</span><span class="t">${e.practice ? "" : `Q${i + 1}. `}${esc(q.title)}</span><span class="sc">${s}/100</span></div>
       <div class="bar-meter" aria-hidden="true"><i style="width:${s}%"></i></div>
-      <div class="status">${q.type === "sjt" ? `${sjtAnswered(q, e.ans && e.ans[id])}/${q.items.length} answered · ${b ? b.passed : 0}/${sjtMax(q)} points` : b ? `${b.passed}/${b.total} tests passed · ${LANGS[b.lang].label}` : "Not submitted"}</div>
+      <div class="status">${q.type === "sjt" ? `${sjtAnswered(q, e.ans && e.ans[id])}/${q.items.length} answered · ${b ? b.passed : 0}/${sjtMax(q)} points` : b ? `${b.passed}/${b.total} tests passed · ${esc(q.type === "repo" ? envName(b.lang) : LANGS[b.lang].label)}` : "Not submitted"}${q.type === "repo" && e.ai && e.ai[id] && (e.ai[id].hints || e.ai[id].msgs) ? ` · assistant: ${e.ai[id].hints} hint${e.ai[id].hints === 1 ? "" : "s"}, ${e.ai[id].msgs} chat message${e.ai[id].msgs === 1 ? "" : "s"}` : ""}</div>
       ${code ? `<details class="sol"><summary>Your code</summary><pre>${esc(code)}</pre></details>` : ""}
       ${q.lc ? `<div class="status">Practise the same pattern: ${q.lcurl ? `<a href="${esc(q.lcurl)}" target="_blank" rel="noopener">${esc(q.lc)}</a>` : esc(q.lc)}</div>` : ""}
-      ${q.type === "sjt" ? sjtReview(q, (e.ans && e.ans[id]) || {}) : `<details class="sol"><summary>Reference solution${q.type === "sql" ? " (SQL)" : q.type === "debug" ? " (fixed files, JavaScript)" : " (Python)"}</summary><pre>${esc(q.ref)}</pre></details>`}
+      ${q.type === "repo" ? repoReview(q, e.lang[id]) : q.type === "sjt" ? sjtReview(q, (e.ans && e.ans[id]) || {}) : `<details class="sol"><summary>Reference solution${q.type === "sql" ? " (SQL)" : q.type === "debug" ? " (fixed files, JavaScript)" : " (Python)"}</summary><pre>${esc(q.ref)}</pre></details>`}
       ${q.fixnotes ? `<details class="sol"><summary>What was broken</summary>${q.fixnotes}</details>` : ""}
       ${q.refcpp ? `<details class="sol"><summary>Reference solution (C++)</summary><pre>${esc(q.refcpp)}</pre></details>` : ""}</div>`; }).join("");
   return `

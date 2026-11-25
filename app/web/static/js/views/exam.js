@@ -30,6 +30,7 @@ function examHTML(){
   const tabs = e.ids.map((x, i) => { const b = e.best[x], qq = QMAP[x], na = qq.type === "sjt" ? sjtAnswered(qq, e.ans && e.ans[x]) : 0;
     const cls = qq.type === "sjt" ? (na === qq.items.length ? "full" : na ? "part" : "") : !b ? "" : b.score === 100 ? "full" : b.score > 0 ? "part" : ""; return `<button class="qtab" data-q="${i}" aria-current="${i === e.cur}" title="${esc(qq.title)}">Q${i + 1}<span class="dot ${cls}"></span></button>`; }).join("");
   if (q.type === "sjt") return examBar(e, tabs) + sjtHTML(q, e);
+  if (q.type === "repo") return examBar(e, tabs) + repoHTML(q, e);
   const langs = q.type === "sql" ? ["sql"] : q.type === "debug" ? ["js"] : CODE_LANGS;
   return examBar(e, tabs) + `
   <div class="exam">

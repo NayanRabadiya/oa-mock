@@ -1,0 +1,7 @@
+# The Python packages every Django repository question uses. Changing this file makes the app offer to update
+# the environment. Keep the versions pinned.
+Django==5.2.19
+djangorestframework==3.18.3
+asgiref==3.13.0
+sqlparse==0.6.1
+tzdata==2026.6; sys_platform == "win32"

@@ -1,0 +1,22 @@
+{
+ "id": "support-desk",
+ "type": "repo",
+ "title": "Support Desk (repository)",
+ "diff": "Repo",
+ "src": "Written for this mock · repository task",
+ "body": "<p>You are given the repository of a <b>support desk API</b>. Customer tickets come in with a priority, are assigned to agents, move through a fixed workflow (open, in progress, resolved, closed) and must be resolved within a deadline (SLA) that depends on their priority.</p>\n<p><b>Issue:</b> the support team reports four problems: the queue serves new tickets before older ones of the same priority, agents end up with more tickets than their limit, tickets get closed without ever being resolved, and fresh tickets show up as overdue. <b>4 integrated test cases</b> fail.</p>\n<p>Run the tests, read the failures, find the component each one points to, fix it, and run the tests again until they pass. The rules (queue order, agent limit, workflow, SLA hours) are in <code>README.md</code>.</p>\n<p><b>Note:</b> the acceptance criteria are the predefined tests; more tests run when you submit.</p>\n<p class=\"muted\">Written for this mock (it isn't from a company OA), modelled on the support-desk and ticketing repositories candidates report from AI-assisted repository rounds.</p>",
+ "stacks": [
+  "node",
+  "django",
+  "spring"
+ ],
+ "year": 2026,
+ "inp": "",
+ "out": "",
+ "cons": [],
+ "samples": [],
+ "hidden": [],
+ "ref": "",
+ "lc": null,
+ "lcurl": null
+}

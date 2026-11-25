@@ -1,0 +1,49 @@
+{
+  "key": "practice",
+  "name": "Practice Set",
+  "own": true,
+  "tagline": "Our own questions, written for this mock: repository tasks and warm-ups",
+  "headline": "Practise repository tasks on code written for this mock.",
+  "blurb": "questions written for this mock (not reported from a company OA): repository tasks to practise the read, run, trace and fix loop",
+  "defaultFmt": "warmup",
+  "custom": [
+    "library-loans",
+    "support-desk",
+    "wallet-api"
+  ],
+  "formats": {
+    "warmup": {
+      "name": "Repository warm-up",
+      "desc": "Library Loans: a small API with two bugs, in Node.js, Django or Spring Boot · 30 min",
+      "mins": 30,
+      "pools": [
+        [
+          "library-loans"
+        ]
+      ]
+    },
+    "repo": {
+      "name": "Repository task",
+      "desc": "One full practice repository (Support Desk or Wallet API, 4 bugs each) · 60 min",
+      "mins": 60,
+      "pools": [
+        [
+          "support-desk",
+          "wallet-api"
+        ]
+      ]
+    },
+    "custom": {
+      "name": "Custom",
+      "desc": "Pick the questions and the time",
+      "mins": 60,
+      "pools": []
+    }
+  },
+  "offlist": [],
+  "order": [
+    "library-loans",
+    "support-desk",
+    "wallet-api"
+  ]
+}

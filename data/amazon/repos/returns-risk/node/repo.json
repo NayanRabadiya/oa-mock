@@ -1,0 +1,159 @@
+{
+ "stack": "node",
+ "name": "Return / Risk Evaluation Service (Node.js)",
+ "readonly": [
+  "README.md",
+  "package.json",
+  "jest.config.js",
+  "tests/*"
+ ],
+ "open": [
+  "services/eligibilityService.js"
+ ],
+ "tests": [
+  {
+   "id": "ReturnEvaluationTests.accepts a return on the last day of the window",
+   "title": "A return on the last day of the window is accepted",
+   "hidden": false
+  },
+  {
+   "id": "ReturnEvaluationTests.matches categories whatever their case",
+   "title": "Categories match whatever their case",
+   "hidden": false
+  },
+  {
+   "id": "ReturnEvaluationTests.counts returns across every linked account",
+   "title": "History counts every account in the linked group",
+   "hidden": false
+  },
+  {
+   "id": "ReturnEvaluationTests.only approved returns count toward the history",
+   "title": "Only approved returns count toward the history",
+   "hidden": false
+  },
+  {
+   "id": "ReturnEvaluationTests.scores the value of the return as price times quantity",
+   "title": "The value is price x quantity",
+   "hidden": false
+  },
+  {
+   "id": "ReturnEvaluationTests.decides at the score thresholds",
+   "title": "Decisions at the score thresholds (30 and 70)",
+   "hidden": false
+  },
+  {
+   "id": "MoreReturnEvaluationTests.validates the request",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.rejects orders that have not been delivered",
+   "title": "Orders not yet delivered are rejected",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.an item can have only one open return",
+   "title": "An item can have only one open return",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.caps the score at 100",
+   "title": "The score is capped at 100",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.history covers the 90 days before the request",
+   "title": "History covers the 90 days before the request",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.the refund total must be more than 1000",
+   "title": "The refund total must be more than 1000",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.every reason comes with its message",
+   "title": "Every reason comes with its message",
+   "hidden": true
+  },
+  {
+   "id": "MoreReturnEvaluationTests.evaluations are recorded in the history",
+   "title": "Evaluations are recorded in the history",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "config/returnPolicy.js",
+   "test": "matches categories whatever their case",
+   "why": "getPolicy looks the category up as written on the order (\"Electronics\"), but the policy keys are lowercase, so every category looks unknown and nothing can be returned",
+   "fix": "Normalise the category before the lookup: trim and lowercase it.",
+   "edits": [
+    {
+     "fixed": "  const key = String(category || '').trim().toLowerCase();",
+     "buggy": "  const key = String(category || '').trim();"
+    }
+   ]
+  },
+  {
+   "file": "services/eligibilityService.js",
+   "test": "accepts a return on the last day of the window",
+   "why": "the return-window check rejects a request made on the last day of the window (>= instead of >)",
+   "fix": "Only reject when daysSinceDelivery > policy.windowDays; day 30 of a 30-day window is still inside it.",
+   "edits": [
+    {
+     "fixed": "  if (daysSinceDelivery > policy.windowDays) {",
+     "buggy": "  if (daysSinceDelivery >= policy.windowDays) {"
+    }
+   ]
+  },
+  {
+   "file": "services/linkedAccountService.js",
+   "test": "counts returns across every linked account",
+   "why": "getAccountGroup only follows the customer's direct links, so accounts linked through another account (A - B - C) are missed",
+   "fix": "Walk the links until no new account turns up (a breadth-first search over linkedAccountIds).",
+   "edits": [
+    {
+     "fixed": "  const group = [customerId];\n  const seen = new Set(group);\n\n  for (let i = 0; i < group.length; i++) {\n    const customer = store.getCustomer(group[i]);\n    for (const linkedId of (customer && customer.linkedAccountIds) || []) {\n      if (!seen.has(linkedId)) {\n        seen.add(linkedId);\n        group.push(linkedId);\n      }\n    }\n  }\n\n  return group;",
+     "buggy": "  const customer = store.getCustomer(customerId);\n  const linked = (customer && customer.linkedAccountIds) || [];\n\n  return [customerId, ...linked.filter((id) => id !== customerId)];"
+    }
+   ]
+  },
+  {
+   "file": "services/returnHistoryService.js",
+   "test": "only approved returns count toward the history",
+   "why": "recentRefunds counts every past return, including rejected and pending ones, not just approved (refunded) ones",
+   "fix": "Keep only returns with status APPROVED.",
+   "edits": [
+    {
+     "fixed": "      if (ret.status === 'APPROVED' && age >= 0 && age <= HISTORY_DAYS) {",
+     "buggy": "      if (age >= 0 && age <= HISTORY_DAYS) {"
+    }
+   ]
+  },
+  {
+   "file": "services/riskScoringService.js",
+   "test": "scores the value of the return as price times quantity",
+   "why": "the value of the return ignores the quantity (price only)",
+   "fix": "value = price x quantity.",
+   "edits": [
+    {
+     "fixed": "  const value = Number(item.price) * Number(item.quantity || 1);",
+     "buggy": "  const value = Number(item.price);"
+    }
+   ]
+  },
+  {
+   "file": "services/decisionService.js",
+   "test": "decides at the score thresholds",
+   "why": "a score of exactly 70 goes to manual review instead of being rejected (> instead of >=)",
+   "fix": "Reject when score >= REJECT_FROM (70).",
+   "edits": [
+    {
+     "fixed": "  if (score >= REJECT_FROM) {",
+     "buggy": "  if (score > REJECT_FROM) {"
+    }
+   ]
+  }
+ ]
+}

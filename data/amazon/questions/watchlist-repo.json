@@ -1,0 +1,23 @@
+{
+ "id": "watchlist-repo",
+ "type": "repo",
+ "title": "MovieDB Watchlist (repository)",
+ "diff": "Repo",
+ "src": "Amazon SDE Intern OA 2026 · section 2, AI-assisted repository task",
+ "body": "<p><b>MovieDB</b> is an app that allows users to explore movies, submit ratings, and share reviews.</p>\n<p>The <b>watchlist</b> feature helps users save and manage movies they want to watch later. Currently, this feature is not functioning correctly on the backend, affecting usability and engagement.</p>\n<p><b>Issue summary:</b> users can add movies to their watchlist, but these movies do not appear on the Watchlist page. Fix the backend of the watchlist feature.</p>\n<p><b>Steps to reproduce</b> (the app's pages call these API routes):</p>\n<ol>\n<li>Log in with the test credentials <code>sam.rivera@email.com</code> / <code>Password@123</code> (<code>POST /api/auth/login</code>).</li>\n<li>Select a movie and add it to the watchlist (<code>POST /api/watchlist/add</code>).</li>\n<li>Open the Watchlist page (<code>GET /api/watchlist/</code>). The movie should appear here, but currently there are none.</li>\n<li>Users should be able to remove movies from the watchlist, either from the Watchlist page or by toggling <i>Add to Watchlist</i> on the movie page (<code>POST /api/watchlist/remove</code>, <code>GET /api/watchlist/check/&lt;movieId&gt;</code>). This doesn't work either.</li>\n</ol>\n<p><b>Additional requirements:</b> to prevent spam or automated activity, the system must apply rate limiting. Each user can only add or remove movies up to 10 times within any 2-minute period.</p>\n<p>Refer to the <code>README.md</code> file for more details.</p>\n<p><b>Note:</b> the acceptance criteria for this task require that your solution pass all predefined unit tests. Use failing test cases to guide debugging. More tests run when you submit.</p>",
+ "stacks": [
+  "node",
+  "django",
+  "spring"
+ ],
+ "inp": "",
+ "out": "",
+ "cons": [],
+ "samples": [],
+ "hidden": [],
+ "ref": "",
+ "lc": null,
+ "lcurl": null,
+ "year": 2026,
+ "role": "SDE Intern"
+}

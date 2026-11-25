@@ -72,8 +72,8 @@ def question(key, qid):
 
 
 def _light(q):
-    """What the page gets: everything except the hidden tests (and known-wrong solutions), which stay on the server."""
-    out = {k: v for k, v in q.items() if k not in ("hidden", "wrong")}
+    """What the page gets: everything except the hidden tests (and known-wrong solutions and the bug list of a debugging question), which stay on the server."""
+    out = {k: v for k, v in q.items() if k not in ("hidden", "wrong", "bugs")}
     out["hiddenCount"] = len(q.get("hidden", []))
     return out
 

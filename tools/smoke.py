@@ -22,7 +22,8 @@ def main():
     keys = [k for k, _, _ in data.companies()]
     assert keys, "no companies in data/"
     for path in ["/", "/contribute", "/" + keys[0], "/api/companies/%s/data.js" % keys[0], "/static/js/landing.js",
-                 "/static/js/install.js", "/static/css/install.css", "/static/js/exam/langpick.js", "/static/llm-prompt.md"]:
+                 "/static/js/install.js", "/static/css/install.css", "/static/js/exam/langpick.js", "/static/llm-prompt.md",
+                 "/static/js/exam/repo.js", "/static/js/exam/assist.js", "/static/css/repo.css"]:
         code, body = get(path)
         assert code == 200 and body, path
         print("ok  GET", path)
@@ -33,6 +34,10 @@ def main():
     tc = json.loads(body)
     assert set(tc["langs"]) == {"cpp", "java"} and "job" in tc
     print("ok  GET /api/toolchain (C++ %s, Java %s)" % tuple("here" if tc["langs"][l]["ok"] else "missing" for l in ("cpp", "java")))
+    code, body = get("/api/envs", token=True)
+    ev = json.loads(body)
+    assert "django" in ev["envs"] and "job" in ev
+    print("ok  GET /api/envs (Django %s)" % ev["envs"]["django"]["state"])
     p = data.load(keys[0])
     q = next((q for q in p["questions"] if q.get("type", "code") == "code" and q.get("ref")), None)
     if q:

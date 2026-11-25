@@ -5,7 +5,7 @@
    "key": "amazon",
    "name": "Amazon OA Mock",
    "tagline": "SDE Intern 2026: coding · repo debugging · situational judgement",
-   "questions": 10,
+   "questions": 11,
    "years": [
     2026,
     2024
@@ -22,10 +22,11 @@
     "SDE Intern OA 2026",
     "IIITD coding set",
     "Online coding set 2024",
-    "Debugging section"
+    "SDE OA 2026 (AI-assisted)",
+    "Repository task"
    ],
-   "bytes": 18462182,
-   "download": 7757000
+   "bytes": 18711812,
+   "download": 7885000
   },
   {
    "key": "flipkart",
@@ -47,7 +48,7 @@
     "Data Engineer",
     "UI Engineer"
    ],
-   "bytes": 779395,
+   "bytes": 780645,
    "download": 234000
   },
   {
@@ -131,6 +132,24 @@
    ],
    "bytes": 22169971,
    "download": 7246000
+  },
+  {
+   "key": "practice",
+   "name": "Practice Set",
+   "tagline": "Our own questions, written for this mock: repository tasks and warm-ups",
+   "questions": 3,
+   "years": [
+    2026
+   ],
+   "roles": [],
+   "colleges": [],
+   "formats": [
+    "Repository warm-up",
+    "Repository task"
+   ],
+   "bytes": 247230,
+   "download": 126000,
+   "own": true
   },
   {
    "key": "walmart",

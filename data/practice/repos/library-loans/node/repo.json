@@ -1,0 +1,76 @@
+{
+ "stack": "node",
+ "name": "Library Loans API (Node.js)",
+ "readonly": [
+  "README.md",
+  "package.json",
+  "jest.config.js",
+  "tests/*"
+ ],
+ "open": [
+  "services/loanService.js"
+ ],
+ "tests": [
+  {
+   "id": "LoanTests.borrowing and returning a book changes the copies on the shelf",
+   "title": "Borrowing and returning change the copies on the shelf",
+   "hidden": false
+  },
+  {
+   "id": "LoanTests.a member can have at most 3 books out",
+   "title": "A member can have at most 3 books out",
+   "hidden": false
+  },
+  {
+   "id": "LoanTests.late fees start after the 14-day loan period",
+   "title": "Late fees start after the 14-day loan period",
+   "hidden": false
+  },
+  {
+   "id": "LoanTests.a loan can be returned only once",
+   "title": "A loan can be returned only once",
+   "hidden": false
+  },
+  {
+   "id": "MoreLoanTests.validates the request",
+   "title": "Request validation (400 / 404)",
+   "hidden": true
+  },
+  {
+   "id": "MoreLoanTests.a book with every copy out cannot be borrowed",
+   "title": "A book with every copy out can't be borrowed",
+   "hidden": true
+  },
+  {
+   "id": "MoreLoanTests.the fee for one loan is at most 200",
+   "title": "The fee for one loan is at most 200",
+   "hidden": true
+  }
+ ],
+ "bugs": [
+  {
+   "file": "services/feeService.js",
+   "test": "late fees start after the 14-day loan period",
+   "why": "daysLate counts every day since the book was borrowed, so even an on-time return is charged; the 14-day loan period is never taken off",
+   "fix": "daysLate = max(0, days since borrowed - LOAN_DAYS).",
+   "edits": [
+    {
+     "fixed": "  const daysLate = Math.max(0, daysBetween(borrowedAt, returnedAt) - LOAN_DAYS);",
+     "buggy": "  const daysLate = Math.max(0, daysBetween(borrowedAt, returnedAt));"
+    }
+   ]
+  },
+  {
+   "file": "services/loanService.js",
+   "test": "a member can have at most 3 books out",
+   "why": "the loan-limit check lets a member take a 4th book (> instead of >=)",
+   "fix": "Refuse when the member already has MAX_OPEN_LOANS (3) open loans: open.length >= MAX_OPEN_LOANS.",
+   "edits": [
+    {
+     "fixed": "  if (open.length >= MAX_OPEN_LOANS) {",
+     "buggy": "  if (open.length > MAX_OPEN_LOANS) {"
+    }
+   ]
+  }
+ ]
+}

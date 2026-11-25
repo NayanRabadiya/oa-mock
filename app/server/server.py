@@ -17,6 +17,18 @@ GET  /api/companies                  JSON list of companies
 GET  /api/companies/<company>/data.js   window.OA_DATA = {config, questions} without hidden tests
 GET  /api/companies/<company>/questions/<id>/tests   hidden tests (for questions graded in the browser)
 POST /api/grade                      {company, qid, lang, code, scope} -> per-test results (C++, Java, Python)
+GET  /api/envs                       environments for repository questions (Django, ...): state, size, setup job
+POST /api/envs                       {action: install|cancel|remove, key}
+GET  /api/repos/<co>/<qid>/<stack>/tree        files of your working copy (read-only, changed), visible tests
+GET  /api/repos/<co>/<qid>/<stack>/file?path=  one file
+POST /api/repos/<co>/<qid>/<stack>/file        {path, text} saves it
+POST /api/repos/<co>/<qid>/<stack>/reset       {path?} one file or the whole repo back to the start
+POST /api/repos/<co>/<qid>/<stack>/run         {scope: visible|all, reveal} runs the tests
+GET  /api/repos/<co>/<qid>/<stack>/solution    the fixed files and what was broken (for the report)
+POST /api/repos/<co>/<qid>/<stack>/hints       {failing: [test ids]} the hint ladder for those tests
+POST /api/repos/<co>/<qid>/<stack>/chat        {messages, mode, file, results} one reply from the AI assistant
+GET  /api/assist                     AI providers, models, which have a key (never the keys themselves)
+POST /api/assist                     {action: configure|models, provider, key?, model?, url?}
 POST /run                            {lang, code, inputs[], limit} -> {results[]} or {compile_error}
 GET  /api/submissions?company=&qid=  past submissions, newest first (see submissions.py)
 GET  /api/submissions/<company>/<qid>/<id>    one submission with its code
@@ -29,7 +41,7 @@ import html, json, mimetypes, os, secrets
 from urllib.parse import parse_qs, urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import contribute, data, grading, judge, library, submissions, toolchain
+from . import assist, contribute, data, envs, grading, judge, library, repos, submissions, toolchain
 
 WEB_DIR = os.path.join(data.ROOT, "app", "web")
 STATIC_DIR = os.path.join(WEB_DIR, "static")
@@ -108,6 +120,54 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(500, {"error": "could not access %s: %s" % (submissions.SUB_DIR, e)})
         return self._json(404, {"error": "not found"})
 
+    def _repos(self, method, parts, query):
+        """/api/envs and /api/repos/<company>/<qid>/<stack>/<action>"""
+        if not self._token_ok():
+            return self._json(403, {"error": "forbidden"})
+        try:
+            if parts == ["assist"]:
+                if method == "GET":
+                    return self._json(200, assist.providers())
+                req = self._body()
+                if req.get("action") == "models":
+                    return self._json(200, assist.models(req.get("provider")))
+                return self._json(200, assist.configure(req))
+            if parts == ["envs"]:
+                if method == "GET":
+                    return self._json(200, envs.status())
+                req = self._body()
+                action, key = str(req.get("action", "")), req.get("key")
+                if action == "remove":
+                    return self._json(200, envs.remove(key))
+                return self._json(200, envs.start(action, key))
+            if len(parts) == 5 and parts[0] == "repos":
+                co, qid, stack, action = parts[1:]
+                ws = (parse_qs(query).get("ws") or ["practice"])[0]
+                if method == "GET" and action == "tree":
+                    return self._json(200, repos.tree(co, qid, stack, ws))
+                if method == "GET" and action == "file":
+                    return self._json(200, repos.read(co, qid, stack, (parse_qs(query).get("path") or [""])[0], ws))
+                if method == "GET" and action == "solution":
+                    return self._json(200, repos.solution(co, qid, stack))
+                if method == "POST":
+                    req = self._body(limit=repos.MAX_FILE * 2)
+                    if action == "file":
+                        return self._json(200, repos.write(co, qid, stack, req.get("path"), req.get("text"), ws))
+                    if action == "reset":
+                        return self._json(200, repos.reset(co, qid, stack, req.get("path"), ws))
+                    if action == "hints":
+                        return self._json(200, assist.hints(co, qid, stack, [str(x) for x in req.get("failing") or []]))
+                    if action == "chat":
+                        return self._json(200, assist.chat(co, qid, stack, ws, req))
+                    if action == "run":
+                        return self._json(200, repos.run(co, qid, stack, "all" if req.get("scope") == "all" else "visible",
+                                                         bool(req.get("reveal")), ws))
+        except (repos.RepoError, assist.AssistError, submissions.BadRequest, ValueError) as e:
+            return self._json(400, {"error": str(e)})
+        except OSError as e:
+            return self._json(500, {"error": str(e)})
+        return self._json(404, {"error": "not found"})
+
     def do_GET(self):
         if not self._host_ok():
             return self._send(403, "forbidden", "text/plain")
@@ -117,6 +177,8 @@ class Handler(BaseHTTPRequestHandler):
 
         if parts[:2] == ["api", "submissions"]:
             return self._submissions("GET", parts[2:], url.query)
+        if parts[:2] in (["api", "envs"], ["api", "repos"], ["api", "assist"]):
+            return self._repos("GET", parts[1:], url.query)
 
         if not parts:
             links = "".join('<div class="tile mine"><a class="cover" href="/%s" aria-label="%s"></a><div class="tile-head"><div class="logo">'
@@ -198,6 +260,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if urlsplit(self.path).path == "/api/submissions":
             return self._submissions("POST", [], "")
+        rp = [p for p in urlsplit(self.path).path.split("/") if p]
+        if rp[:2] in (["api", "envs"], ["api", "repos"], ["api", "assist"]):
+            return self._repos("POST", rp[1:], urlsplit(self.path).query)
         if urlsplit(self.path).path.startswith("/api/contribute/"):
             if not self._token_ok():
                 return self._json(403, {"error": "forbidden"})
@@ -266,7 +331,7 @@ def _preview(q):
     """What the check page shows of a question: no test data (it can be megabytes)."""
     if not isinstance(q, dict):
         return q
-    out = {k: v for k, v in q.items() if k not in ("hidden", "samples", "wrong", "driver")}
+    out = {k: v for k, v in q.items() if k not in ("hidden", "samples", "wrong", "driver", "bugs")}
     out["samples"] = len(q.get("samples") or []); out["hidden"] = len(q.get("hidden") or [])
     return out
 

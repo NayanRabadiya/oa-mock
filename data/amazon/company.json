@@ -13,20 +13,21 @@
     "outlier",
     "winners",
     "qmarks",
-    "watchlist",
+    "watchlist-repo",
+    "returns-risk",
     "sjt"
   ],
   "formats": {
     "sde": {
       "name": "SDE Intern OA 2026",
-      "desc": "3 sections: coding (Longest Run After One Flip), MovieDB repo debugging, situational judgement · 120 min",
+      "desc": "3 sections: coding (Longest Run After One Flip), the MovieDB repository task (Node.js, Django or Spring Boot), situational judgement · 120 min",
       "mins": 120,
       "pools": [
         [
           "flip"
         ],
         [
-          "watchlist"
+          "watchlist-repo"
         ],
         [
           "sjt"
@@ -68,13 +69,35 @@
         ]
       ]
     },
-    "debug": {
-      "name": "Debugging section",
-      "desc": "MovieDB watchlist repo: fix the backend until the integration tests pass · 60 min",
+    "ai": {
+      "name": "SDE OA 2026 (AI-assisted)",
+      "desc": "The AI-assisted format: one coding question (about 40 min), then one repository task, MovieDB or Return / Risk (about 60 min) · 100 min",
+      "mins": 100,
+      "pools": [
+        [
+          "flip",
+          "palsub",
+          "evenrun",
+          "findpairs",
+          "parcels",
+          "outlier",
+          "winners",
+          "qmarks"
+        ],
+        [
+          "watchlist-repo",
+          "returns-risk"
+        ]
+      ]
+    },
+    "repo": {
+      "name": "Repository task",
+      "desc": "One repository task, MovieDB watchlist or Return / Risk Evaluation: pick your environment, then fix the backend until the tests pass · 60 min",
       "mins": 60,
       "pools": [
         [
-          "watchlist"
+          "watchlist-repo",
+          "returns-risk"
         ]
       ]
     },
@@ -85,13 +108,6 @@
       "pools": []
     }
   },
-  "offlist": [
-    {
-      "t": "Return/Risk Evaluation System (repo debugging)",
-      "s": "Amazon SDE-1 Intern OA 2026 · section 2",
-      "why": "Only an outline was shared (7+ files, return-window checks, linked accounts, risk scoring, approve/review/reject decisions, 6 integrated tests). The MovieDB question practises the same read-trace-fix workflow."
-    }
-  ],
   "order": [
     "flip",
     "palsub",
@@ -101,7 +117,8 @@
     "outlier",
     "winners",
     "qmarks",
-    "watchlist",
+    "watchlist-repo",
+    "returns-risk",
     "sjt"
   ]
 }
